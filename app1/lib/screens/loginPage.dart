@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-//import 'package:pollutrack25/screens/exposure.dart';
-//import 'package:pollutrack25/screens/onboarding.dart';
+import 'package:app1/screens/homePage.dart';
+import 'package:app1/screens/onboardingPage.dart';
 import 'package:app1/utils/impact.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
-class Login extends StatelessWidget {
-  Login({Key? key}) : super(key: key);
+class LoginPage extends StatelessWidget {
+  LoginPage({Key? key}) : super(key: key);
 
   // text controllers to check the username and password inserted by the user
   final TextEditingController userController = TextEditingController();
@@ -24,7 +24,7 @@ class Login extends StatelessWidget {
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             // import the logo image from assets folder (make sure to add the folder in pubspec.yaml)
             Image.asset(
-              'assets/logo.png',
+              'assets/images/logo.png',
               scale: 4,
               ),
             const SizedBox(
@@ -97,7 +97,7 @@ class Login extends StatelessWidget {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const Exposure(),
+                            builder: (context) => HomePage(),
                           ),
                         );
                       }
@@ -130,7 +130,7 @@ class Login extends StatelessWidget {
             const Align(
                 alignment: Alignment.bottomCenter,
                 child: Text(
-                  "By logging in, you agree to Pollutrack's\nTerms & Conditions and Privacy Policy",
+                  "By logging in, you agree to Ready to Sleep's\nTerms & Conditions and Privacy Policy",
                   style: TextStyle(fontSize: 12),
                 )),
                 ]),

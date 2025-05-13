@@ -1,11 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:orilla_fresca_app/helpers/appcolors.dart';
-import 'package:orilla_fresca_app/helpers/iconhelper.dart';
-import 'package:orilla_fresca_app/helpers/utils.dart';
-import 'package:orilla_fresca_app/services/loginservice.dart';
-import 'package:orilla_fresca_app/widgets/iconfont.dart';
-import 'package:orilla_fresca_app/widgets/themebutton.dart';
-import 'package:provider/provider.dart';
+import 'package:app1/screens/loginPage.dart';
 
 class WelcomePage extends StatelessWidget {
 
@@ -21,7 +15,7 @@ class WelcomePage extends StatelessWidget {
               child: Opacity( //to make the wallpaper image transparent 
                 opacity: 0.3,
                 child: Image.asset(
-                'assets/imgs/of_main_bg.png', //IMAGE TO CHANGE
+                'assets/images/wallpaper_welcomepage.png', 
                 fit: BoxFit.cover),
               ),
             ),
@@ -31,22 +25,17 @@ class WelcomePage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch, //centers vertically
                 children: [
                   Center(
-                    child: ClipOval( //oval logo
-                      child: Container(
+                    child: ClipOval( //app's logo
+                      child: Image.asset(
+                        'assets/images/logo.png',
                         width: 180,
                         height: 180,
-                        color: AppColors.MAIN_COLOR,
-                        alignment: Alignment.center,
-                        child: IconFont(
-                          iconName: IconFontHelper.MAIN_LOGO,
-                          color: Colors.white,
-                          size: 130
-                        ),
+                        fit: BoxFit.cover,
                       ),
                     ),
                   ),
                   SizedBox(height: 50),
-                  Text('Welcome to', //DA SISTEMARE
+                  Text('Welcome to Ready to Sleep!', 
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white,
@@ -55,7 +44,16 @@ class WelcomePage extends StatelessWidget {
                     )
                   ),
                   SizedBox(height: 40),
-                  Text('Productos Frescos.\nSaludables. A Tiempo', //DOVE DOBBIAMO SCRIVERE IL NOSTRO PARAGRAFETTO
+                  Text('Sleep well, live better!', 
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold
+                    )
+                  ),
+                  SizedBox(height: 40),
+                  Text('We hope that this app will help you recognize how essential sleep is,\nbecause sleeping well today means living better tomorrow.\n-the developers', 
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white,
@@ -63,9 +61,6 @@ class WelcomePage extends StatelessWidget {
                     )
                   ),
                   SizedBox(height: 40),
-
-
-                  //NOSTRO BOTTONE
                   Container(
                     height: 50,
                     width: 250,
@@ -74,7 +69,7 @@ class WelcomePage extends StatelessWidget {
                       onPressed: () {
                         Navigator.pushReplacement(
                         context, MaterialPageRoute(builder: (_) => LoginPage()));
-                      }
+                      },
                       child: Text(
                         'Login',
                       ),
