@@ -8,7 +8,7 @@ class WelcomePage extends StatelessWidget {
 
     return Scaffold(
       body: Container(
-        color: Colors.black,
+        color: Colors.red,
         child: Stack(
           children: [
             Positioned.fill( //wallpaper image
