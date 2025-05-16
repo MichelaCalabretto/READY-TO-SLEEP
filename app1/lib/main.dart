@@ -1,3 +1,4 @@
+import 'package:app1/screens/splashPage.dart';
 import 'package:app1/screens/welcomePage.dart';
 import 'package:flutter/material.dart';
 
@@ -12,7 +13,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Trial App1',
-      home: WelcomePage(),
+      home: SplashPage(),
       );
   }
 }

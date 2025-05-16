@@ -7,80 +7,100 @@ class WelcomePage extends StatelessWidget {
   Widget build(BuildContext context) {
 
     return Scaffold(
-      body: Container(
-        color: Colors.red,
-        child: Stack(
-          children: [
-            Positioned.fill( //wallpaper image
-              child: Opacity( //to make the wallpaper image transparent 
-                opacity: 0.3,
-                child: Image.asset(
-                'assets/images/wallpaper_welcomepage.png', 
-                fit: BoxFit.cover),
+      extendBodyBehindAppBar: true, //allows content behind status/navigation bar
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: Container(
+          width: double.infinity,
+          height: double.infinity,
+          child: Stack(
+            children: [
+              Positioned.fill( //wallpaper image
+                child: Opacity( //to make the wallpaper image transparent 
+                  opacity: 1,
+                  child: Image.asset(
+                  'assets/images/welcomePage_wallpaper.png', 
+                  fit: BoxFit.cover),
+                ),
               ),
-            ),
-            Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center, //centers horizontally
-                crossAxisAlignment: CrossAxisAlignment.stretch, //centers vertically
-                children: [
-                  Center(
-                    child: ClipOval( //app's logo
-                      child: Image.asset(
-                        'assets/images/logo.png',
-                        width: 180,
-                        height: 180,
-                        fit: BoxFit.cover,
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0), // padding orizzontale di 20px
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center, //centers horizontally
+                    crossAxisAlignment: CrossAxisAlignment.stretch, //centers vertically
+                    children: [
+                      Center(
+                        child: ClipOval( //app's logo
+                          child: Image.asset(
+                            'assets/images/logo.png',
+                            width: 180,
+                            height: 180,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  SizedBox(height: 50),
-                  Text('Welcome to Ready to Sleep!', 
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 40,
-                      fontWeight: FontWeight.bold
-                    )
-                  ),
-                  SizedBox(height: 40),
-                  Text('Sleep well, live better!', 
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold
-                    )
-                  ),
-                  SizedBox(height: 40),
-                  Text('We hope that this app will help you recognize how essential sleep is,\nbecause sleeping well today means living better tomorrow.\n-the developers', 
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18
-                    )
-                  ),
-                  SizedBox(height: 40),
-                  Container(
-                    height: 50,
-                    width: 250,
-                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pushReplacement(
-                        context, MaterialPageRoute(builder: (_) => LoginPage()));
-                      },
-                      child: Text(
-                        'Login',
+                      SizedBox(height: 30),
+                      Text('Welcome to\nReady to Sleep!', 
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 40,
+                          fontWeight: FontWeight.bold
+                        )
                       ),
-                    ),
+                      SizedBox(height: 30),
+                      Text('Sleep well, live better!', 
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold
+                        )
+                      ),
+                      SizedBox(height: 40),
+                      Text('We hope that this app will help you recognize how essential sleep is, because sleeping well today means living better tomorrow.', 
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontStyle: FontStyle.italic,
+                        )
+                      ),
+                      SizedBox(height: 10),
+                      Text('-The developers',
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,),
+                      ),
+                      SizedBox(height: 30),
+                      Center(
+                        child: ElevatedButton(
+                        onPressed: () {
+                            Navigator.pushReplacement(
+                              context, 
+                              MaterialPageRoute(builder: (_) => LoginPage())); 
+                          },
+                          style: ElevatedButton.styleFrom( 
+                            backgroundColor: Colors.white, 
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),), 
+                            padding: EdgeInsets.symmetric(horizontal: 60, vertical: 20),
+                          ),
+                          child: Text(
+                            'Login',
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            )
-          ],
+                ),
+              )
+            ],
+          )
         )
-      )
+      ),
     );
   }
 }

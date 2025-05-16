@@ -62,10 +62,22 @@
       "languageVersion": "3.7"
     },
     {
+      "name": "flutter_animate",
+      "rootUri": "file:///Users/michela/.pub-cache/hosted/pub.dev/flutter_animate-4.5.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
+    },
+    {
       "name": "flutter_lints",
       "rootUri": "file:///Users/michela/.pub-cache/hosted/pub.dev/flutter_lints-5.0.0",
       "packageUri": "lib/",
       "languageVersion": "3.5"
+    },
+    {
+      "name": "flutter_shaders",
+      "rootUri": "file:///Users/michela/.pub-cache/hosted/pub.dev/flutter_shaders-0.1.3",
+      "packageUri": "lib/",
+      "languageVersion": "2.19"
     },
     {
       "name": "flutter_test",
@@ -302,7 +314,7 @@
       "languageVersion": "3.7"
     }
   ],
-  "generated": "2025-05-14T07:43:27.791860Z",
+  "generated": "2025-05-16T07:59:51.515803Z",
   "generator": "pub",
   "generatorVersion": "3.7.0",
   "flutterRoot": "file:///Users/michela/Applications/flutter",
