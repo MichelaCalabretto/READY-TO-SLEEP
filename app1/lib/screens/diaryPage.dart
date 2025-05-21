@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:app1/screens/profilePage.dart';
-import 'package:app1/widgets/custom_drawer.dart';
+import 'package:app1/widgets/my_drawer.dart';
 
 class DiaryPage extends StatelessWidget {
   DiaryPage({Key? key}) : super(key: key);
