@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:app1/screens/profilePage.dart';
+import 'package:app1/widgets/custom_drawer.dart';
 
 class HomePage extends StatelessWidget {
   HomePage({Key? key}) : super(key: key);
@@ -7,9 +9,23 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context){
     return Scaffold(
         appBar: AppBar(title: Text('Welcome to Flutter'),),
-        body: Center(child: Text('Hello World'),)
+        body: Center(child: Text('Hello World'),),
+        drawer: const MyDrawer(),
+        //drawer: Drawer(
+          //child: ListTile(
+            //leading: Icon(Icons.person),
+            //title: Text('Profile'),
+            //onTap: () {
+              //Navigator.pop(context); // chiude il drawer
+              //Navigator.push(
+                //context,
+                //MaterialPageRoute(builder: (context) => ProfilePage()),
+              //);
+            //},
+          //),
+        //),
     );
-}//build
+  }//build
 }
 
 

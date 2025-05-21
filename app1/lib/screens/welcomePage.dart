@@ -16,12 +16,10 @@ class WelcomePage extends StatelessWidget {
           height: double.infinity,
           child: Stack(
             children: [
-              Positioned.fill( //wallpaper image
-                child: Opacity( //to make the wallpaper image transparent 
-                  opacity: 1,
-                  child: Image.asset(
-                  'assets/images/welcomePage_wallpaper.png', 
-                  fit: BoxFit.cover),
+              Positioned.fill( //wallpaper
+                child: Image.asset(
+                  'images/welcomePage_wallpaper.png',
+                  fit: BoxFit.cover,
                 ),
               ),
               Center(
@@ -89,7 +87,7 @@ class WelcomePage extends StatelessWidget {
                             padding: EdgeInsets.symmetric(horizontal: 60, vertical: 20),
                           ),
                           child: Text(
-                            'Login',
+                            'To LoginPage',
                           ),
                         ),
                       ),
