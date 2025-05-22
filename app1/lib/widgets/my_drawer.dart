@@ -112,7 +112,7 @@ class MyDrawer extends StatelessWidget {
               ),
             ),
             
-            // Voci di menu
+            //Menu options
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -154,7 +154,7 @@ class MyDrawer extends StatelessWidget {
               ),
             ),
 
-            // Logout in fondo
+            // Logout at the bottom
             Padding(
               padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
               child: ListTile(

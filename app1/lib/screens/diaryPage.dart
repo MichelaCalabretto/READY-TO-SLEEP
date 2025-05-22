@@ -8,8 +8,39 @@ class DiaryPage extends StatelessWidget {
   @override
   Widget build(BuildContext context){
     return Scaffold(
-        appBar: AppBar(title: Text('Trial App1'),),
-        body: Center(child: Text('diaryPage'),),
+      extendBodyBehindAppBar: true, // extend background behind app bar
+      appBar: AppBar(
+        title: const Text(
+          'Welcome to Flutter',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 30,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: Colors.transparent, // transparent app bar
+        elevation: 0,
+        foregroundColor: Colors.white, // white text color matching profilePage
+      ),
+      drawer: const MyDrawer(),
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/welcomePage_wallpaper.png'), 
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: const Center(
+          child: Text(
+            'diaryPage',
+            style: TextStyle(
+              color: Colors.white, 
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
     );
-  }//build
+  } // build
 }

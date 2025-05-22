@@ -5,7 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:app1/widgets/avatar_dropdown.dart';
 import 'package:app1/models/user_profile.dart';
 
-
 class OnboardingPage extends StatefulWidget {
   OnboardingPage({Key? key}) : super(key: key);
 
@@ -23,6 +22,8 @@ class _OnboardingState extends State<OnboardingPage> {
   String? _selectedGender;
   String? _selectedJob;
   String? _selectedAvatar;
+
+  final Color darkPurple = Color.fromARGB(255, 38, 9, 68); //reference color
 
   @override
   void initState() {
@@ -43,7 +44,6 @@ class _OnboardingState extends State<OnboardingPage> {
     });
   }
 
-
   Future<void> _selectDate(BuildContext context) async {
     DateTime? picked = await showDatePicker( //showDatePicker shows the calendar
       context: context,
@@ -59,9 +59,8 @@ class _OnboardingState extends State<OnboardingPage> {
   }
 
   Future<void> _submitForm() async {
-
     //Saves every field that was filled out; at least one field must be filled out
-    bool hasAnyInput =  //true only if atleast one field was filled out
+    bool hasAnyInput =  //true only if at least one field was filled out
       _nameController.text.trim().isNotEmpty ||
       _surnameController.text.trim().isNotEmpty ||
       _nicknameController.text.trim().isNotEmpty ||
@@ -72,7 +71,13 @@ class _OnboardingState extends State<OnboardingPage> {
         
     if (!hasAnyInput) { //if no field was compiled
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No info was provided! At least one field must be filled out, otherwise press Skip')),
+        SnackBar(
+          backgroundColor: Color.fromARGB(255, 192, 153, 227),
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.all(8),
+          duration: Duration(seconds: 2),
+          content: Text('No info was provided! At least one field must be filled out, otherwise press Skip',),
+        ),
       );
       return;
     }
@@ -90,7 +95,12 @@ class _OnboardingState extends State<OnboardingPage> {
     await profile.save();
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Data saved')),
+      SnackBar(
+        backgroundColor: Color.fromARGB(255, 192, 153, 227),
+        behavior: SnackBarBehavior.floating,
+        margin: EdgeInsets.all(8),
+        duration: Duration(seconds: 2),
+        content: Text('Data saved')),
     );
 
     Navigator.pushReplacement(
@@ -108,166 +118,211 @@ class _OnboardingState extends State<OnboardingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       // SafeArea widget to avoid system UI overlaps
-      body: SafeArea(
-        child: Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(30.0),
-              child: SingleChildScrollView( //to scroll vertically if the content is bigger than the screen
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Center(
-                      child: Text(
-                        'Let\'s know you better',
-                        style: TextStyle(
-                          color: Colors.black, //UNA VOLTA MESSO LO SFONDO SARA' DA CAMBIARE IN BIANCO
-                          fontSize: 35,
-                          fontWeight: FontWeight.bold,
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/welcomePage_wallpaper.png',
+              fit: BoxFit.cover,
+            ),
+          ),
+          //LayoutBuilder to ensure image covers full height, including when content is larger than screen
+          LayoutBuilder( //allows you to build child widgets based on the size of the parent widget 
+            builder: (context, constraints) {
+              return SingleChildScrollView( //it sizes itself based on its content, not the size of the screen ---> that's why we added LayoutBuilder()
+                child: ConstrainedBox( //to force minimum height: this way the ScrollView's height is gonna be the entire screen
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight), //it's saying: even if your content is short, stretch to at least the full height of the screen
+                  child: IntrinsicHeight(
+                    child: SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.all(30.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Center(
+                              child: Text(
+                                'Let\'s know you better',
+                                style: TextStyle(
+                                  color: Colors.white, 
+                                  fontSize: 35,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 25),
+                            Form(
+                              key: _formKey,
+                              child: Column(
+                                children: [
+                                  TextFormField(
+                                    controller: _nameController,
+                                    style: TextStyle(color: Colors.white),
+                                    decoration: InputDecoration(
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        borderSide: BorderSide(color: Colors.white),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        borderSide: BorderSide(color: Colors.white),
+                                      ),
+                                      labelText: 'Name',
+                                      hintText: 'Enter your name',
+                                      labelStyle: TextStyle(color: Colors.white),
+                                      hintStyle: TextStyle(color: Colors.white70),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  TextFormField(
+                                    controller: _surnameController,
+                                    style: TextStyle(color: Colors.white),
+                                    decoration: InputDecoration(
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        borderSide: BorderSide(color: Colors.white),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        borderSide: BorderSide(color: Colors.white),
+                                      ),
+                                      labelText: 'Surname',
+                                      hintText: 'Enter your surname',
+                                      labelStyle: TextStyle(color: Colors.white),
+                                      hintStyle: TextStyle(color: Colors.white70),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  TextFormField(
+                                    controller: _nicknameController,
+                                    style: TextStyle(color: Colors.white),
+                                    decoration: InputDecoration(
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        borderSide: BorderSide(color: Colors.white),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        borderSide: BorderSide(color: Colors.white),
+                                      ),
+                                      labelText: 'Nickname',
+                                      hintText: 'Choose your nickname',
+                                      labelStyle: TextStyle(color: Colors.white),
+                                      hintStyle: TextStyle(color: Colors.white70),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  DropdownButtonFormField<String>(
+                                    dropdownColor: darkPurple,
+                                    decoration: InputDecoration(
+                                      labelText: 'Sex',
+                                      labelStyle: TextStyle(color: Colors.white),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        borderSide: BorderSide(color: Colors.white),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        borderSide: BorderSide(color: Colors.white),
+                                      ),
+                                    ),
+                                    value: _selectedGender,
+                                    items: ['M', 'F', 'Other'].map((gender) {
+                                      return DropdownMenuItem<String>(
+                                        value: gender,
+                                        child: Text(gender, style: TextStyle(color: Colors.white)),
+                                      );
+                                    }).toList(),
+                                    onChanged: (value) => setState(() => _selectedGender = value),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  TextFormField(
+                                    controller: _dateController,
+                                    readOnly: true,
+                                    style: TextStyle(color: Colors.white),
+                                    decoration: InputDecoration(
+                                      labelText: 'Date of birth',
+                                      labelStyle: TextStyle(color: Colors.white),
+                                      hintStyle: TextStyle(color: Colors.white70),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        borderSide: BorderSide(color: Colors.white),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        borderSide: BorderSide(color: Colors.white),
+                                      ),
+                                    ),
+                                    onTap: () => _selectDate(context),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  DropdownButtonFormField<String>(
+                                    dropdownColor: darkPurple,
+                                    decoration: InputDecoration(
+                                      labelText: 'Job',
+                                      labelStyle: TextStyle(color: Colors.white),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        borderSide: BorderSide(color: Colors.white),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        borderSide: BorderSide(color: Colors.white),
+                                      ),
+                                    ),
+                                    value: _selectedJob,
+                                    items: ['Student', 'Unemployed', 'Freelancer', 'Engineer', 'Doctor', 'Teacher', 'Lawyer', 'Marketing Specialist', 'Consultant', 'Architect', 'Mechanic', 'Electrician', 'Plumber', 'Artist', 'Police Officer', 'Firefighter', 'Chef', 'Retail Worker', 'Other'].map((job) {
+                                      return DropdownMenuItem<String>(
+                                        value: job,
+                                        child: Text(job, style: TextStyle(color: Colors.white)),
+                                      );
+                                    }).toList(),
+                                    onChanged: (value) => setState(() => _selectedJob = value),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  AvatarDropdown(
+                                    selectedAvatar: _selectedAvatar,
+                                    onChanged: (value) => setState(() => _selectedAvatar = value),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      TextButton(
+                                        onPressed: () async {
+                                          await _setOnboardingCompleted();
+                                          Navigator.pushReplacement(
+                                            context,
+                                            MaterialPageRoute(builder: (context) => HomePage()),
+                                          );
+                                        },
+                                        child: Text(
+                                          'Skip',
+                                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),
+                                        ),
+                                      ),
+                                      ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.white,
+                                          foregroundColor: darkPurple,
+                                        ),
+                                        onPressed: _submitForm,
+                                        child: Text('Save', style: TextStyle(fontWeight: FontWeight.bold),),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 25),
-                    Form(
-                      key: _formKey,
-                      child: Column(
-                        children: [
-                          TextFormField(
-                            controller: _nameController,
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              labelText: 'Name',
-                              hintText: 'Enter your name',
-                            ),
-                            //validator: (value) { //this function is run when validate() is invoked
-                              //if (value == null || value.isEmpty) {
-                                //return 'Please enter your name';
-                              //}
-                              //return null; //it means the field was filled out, so it is considered valid
-                            //},
-                          ),
-                          const SizedBox(height: 20),
-                          TextFormField(
-                            controller: _surnameController,
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              labelText: 'Surname',
-                              hintText: 'Enter your surname',
-                            ),
-                            //validator: (value) { 
-                              //if (value == null || value.isEmpty) {
-                                //return 'Please enter your surname';
-                              //}
-                              //return null; 
-                            //},
-                          ),
-                          const SizedBox(height: 20),
-                          TextFormField(
-                            controller: _nicknameController,
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              labelText: 'Nickname',
-                              hintText: 'Choose your nickname',
-                            ),
-                            //validator: (value) { 
-                              //if (value == null || value.isEmpty) {
-                                //return 'Please choose a nickname';
-                              //}
-                              //return null; 
-                            //},
-                          ),
-                          const SizedBox(height: 20),
-                          DropdownButtonFormField<String>( //creates a dropdown nput field 
-                            decoration: InputDecoration(
-                              labelText: 'Sex',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                            value: _selectedGender,
-                            items: ['M', 'F', 'Other'].map((gender) {
-                              return DropdownMenuItem<String>(
-                                value: gender, //the actual data stored
-                                child: Text(gender), //what the user sees
-                              );
-                            }).toList(), //toList() turns the map() result into a real list for the dropdown
-                            onChanged: (value) => setState(() => _selectedGender = value),
-                            //validator: (value) => value == null ? 'Choose gender' : null, //if no option was selected it returns an error message, if the value was selected it returns null (=valid)
-                          ),
-                          const SizedBox(height: 20),
-                          TextFormField(
-                            controller: _dateController,
-                            readOnly: true, //makes the field non-editable by keyboard; prevents users from typing the date manually
-                            decoration: InputDecoration(
-                              labelText: 'Date of birth',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                            onTap: () => _selectDate(context), //when pressed, it calls the _selectDate() method
-                            //validator: (value) => value == null || value.isEmpty ? 'Pick a date' : null,
-                          ),
-                          const SizedBox(height: 20),
-                          DropdownButtonFormField<String>( 
-                            decoration: InputDecoration(
-                              labelText: 'Job',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                            value: _selectedJob,
-                            items: ['Student', 'Unemployed', 'Freelancer', 'Engineer', 'Doctor', 'Teacher', 'Lawyer', 'Marketing Specialist', 'Consultant', 'Architect', 'Mechanic', 'Electrician', 'Plumber', 'Artist', 'Police Officer', 'Firefighter', 'Chef', 'Retail Worker', 'Other'].map((job) {
-                              return DropdownMenuItem<String>(
-                                value: job, //the actual data stored
-                                child: Text(job), //what the user sees
-                              );
-                            }).toList(), 
-                            onChanged: (value) => setState(() => _selectedJob = value),
-                            //validator: (value) => value == null ? 'Choose a job' : null, 
-                          ),
-                          const SizedBox(height: 20),
-                          AvatarDropdown(
-                            selectedAvatar: _selectedAvatar,
-                            onChanged: (value) => setState(() => _selectedAvatar = value),
-                          ),
-                          const SizedBox(height: 20),
-                          Row( //with Row() the skip and save button will be aligned even if we add other fields to fill
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              TextButton(
-                                onPressed: () async {
-                                  await _setOnboardingCompleted();
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(builder: (context) => HomePage()),
-                                  );
-                                },
-                                child: Text(
-                                  'Skip',
-                                  style: TextStyle(color: Theme.of(context).colorScheme.primary),
-                                ),
-                              ),
-                              ElevatedButton(
-                                onPressed: _submitForm,
-                                child: Text('Save'),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-          ],
-        ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
