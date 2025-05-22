@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:app1/widgets/graph1.dart';
+import 'package:app1/screens/homePage.dart';
 
 class GoalPage extends StatelessWidget {
   const GoalPage({Key? key}) : super(key: key);
@@ -16,16 +17,15 @@ class GoalPage extends StatelessWidget {
         ),
         body: const TabBarView(
           children: <Widget>[
+            Center(child: HomePage()),
             Center(child: Graph1()),
-            Center(child: Text("Pagina obiettivo da inserire")),
             
           ],
         ),
         bottomNavigationBar: const TabBar( 
           tabs: <Widget>[
-            Tab(icon: Icon(Icons.home_outlined), text: 'Home',),
             Tab(icon: Icon(Icons.emoji_events), text: 'Goal',), 
-          
+            Tab(icon: Icon(Icons.home_outlined), text: 'Home',),
           ],
         ),
       ),
