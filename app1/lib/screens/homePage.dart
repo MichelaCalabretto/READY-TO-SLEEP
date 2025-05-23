@@ -88,6 +88,7 @@
 import 'package:flutter/material.dart';
 import 'package:app1/screens/profilePage.dart';
 import 'package:app1/widgets/my_drawer.dart';
+import 'package:app1/widgets/chart_switcher.dart'; // Assicurati che ChartSwitcher sia in questo file
 
 class HomePage extends StatelessWidget {
   HomePage({Key? key}) : super(key: key);
@@ -113,7 +114,7 @@ class HomePage extends StatelessWidget {
       ),
       drawer: const MyDrawer(),
       body: Container(
-        // make sure container takes full screen and image covers everything including behind system bars
+        //make sure container takes full screen and image covers everything including behind system bars
         decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/images/welcomePage_wallpaper.png'),
@@ -121,20 +122,27 @@ class HomePage extends StatelessWidget {
           ),
         ),
         child: Center(
-          child: Text(
-            'Hello World',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              shadows: [
-                Shadow(
-                  blurRadius: 4,
-                  color: Colors.black54,
-                  offset: Offset(1, 1),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Hello World',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  shadows: [
+                    Shadow(
+                      blurRadius: 4,
+                      color: Colors.black54,
+                      offset: Offset(1, 1),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 32),
+              const ChartSwitcher(), // widget with graphs
+            ],
           ),
         ),
       ),

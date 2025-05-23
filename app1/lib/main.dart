@@ -7,6 +7,10 @@ import 'package:app1/screens/goalPage.dart';
 import 'package:app1/screens/profilePage.dart';
 import 'package:app1/screens/diaryPage.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:app1/providers/data_provider.dart';
+import 'package:app1/screens/homeProva.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -17,16 +21,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Trial App1',
-      //home: OnboardingPage()
-      //home: HomePage(),
-      //home: SplashPage(),
-      //home: LoginPage(),
-      //home: GoalPage()
-      //home: ProfilePage(),
-      home: DiaryPage(),
-      );
+    return ChangeNotifierProvider(
+      create: (_) => SleepDataProvider(), // Fornisce il provider a tutta l'app
+      child: MaterialApp(
+        title: 'Trial App1',
+        home: HomeProva(),  // Usa HomePage, quella con il fetch dati e provider
+        debugShowCheckedModeBanner: false,
+      ),
+    );
   }
 }
 
