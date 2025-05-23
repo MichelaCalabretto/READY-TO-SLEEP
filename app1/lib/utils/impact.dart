@@ -84,20 +84,6 @@ class Impact {
     print('Calling: $url');
     final response = await http.get(Uri.parse(url), headers: headers);
 
-
-
-
-    if (response.statusCode == 200) {
-      print('Response body: ${response.body}');
-      result = jsonDecode(response.body);
-    } else {
-      print('Request failed with status: ${response.statusCode}');
-    }
-
-
-
-
-
     //if OK parse the response, otherwise return null
     var result = null;
     if (response.statusCode == 200) {

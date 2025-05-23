@@ -10,32 +10,13 @@ class SleepDataProvider extends ChangeNotifier {
   Future<void> fetchSleepTrendData(String startDate, String endDate) async { //in input you give the startDate and endDate
     final data = await Impact.fetchSleepTrendData(startDate, endDate); // Usato Impact.fetchSleepTrendData con 2 date
     
-    
-    if (data != null && 
-    data['data'] != null && 
-    data['data']['data'] != null && 
-    data['data']['date'] != null) {
+    if (data != null) {
       trendData.clear();
-      
       for (var item in data['data']['data']) {
-        if (item != null) {
-          trendData.add(SleepDataTrend.fromJson(data['data']['date'], item));
-        }
+        trendData.add(SleepDataTrend.fromJson(data['data']['date'], item));
       }
-  
-     notifyListeners();
-    } else {
-      print('Invalid or incomplete sleep trend data received: $data');
+      notifyListeners();
     }
-    
-    
-    //if (data != null) {
-      //trendData.clear();
-      //for (var item in data['data']['data']) {
-        //trendData.add(SleepDataTrend.fromJson(data['data']['date'], item));
-      //}
-      //notifyListeners();
-    //}
   }
 
   Future<void> fetchSleepNightData(String day) async {
