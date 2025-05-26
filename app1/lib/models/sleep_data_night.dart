@@ -21,16 +21,22 @@ class SleepDataNight {
     required this.remMinutes,
   });
 
- 
+  // Helper to safely parse int from dynamic
+  static int _parseInt(dynamic value) {
+    if (value is int) return value;
+    if (value is String) return int.tryParse(value) ?? 0;
+    return 0;
+  }
+
   SleepDataNight.fromJson(String date, Map<String, dynamic> json)
-      : time = DateFormat('yyyy-MM-dd HH:mm:ss').parse('$date ${json["time"]}'),
-        duration = int.parse(json["duration"]),
-        minutesToFallAsleep = int.parse(json["minutesToFallAsleep"]),
-        minutesAwake = int.parse(json["minutesAwake"]),
-        minutesAfterWakeUp = int.parse(json["minutesAfterWakeUp"]),
-        deepMinutes = int.parse(json["deepMinutes"]),
-        lightMinutes = int.parse(json["lightMinutes"]),
-        remMinutes = int.parse(json["remMinutes"]);
+      : time = DateFormat('yyyy-MM-dd HH:mm:ss').parse('$date ${json["startTime"] ?? "00:00:00"}'),
+        duration = (_parseInt(json["duration"]) ~/ 60000), //ms to minutes ("~/"=integer division)
+        minutesToFallAsleep = _parseInt(json["minutesToFallAsleep"]),
+        minutesAwake = _parseInt(json["minutesAwake"]),
+        minutesAfterWakeUp = _parseInt(json["minutesAfterWakeUp"]),
+        deepMinutes = _parseInt(json["levels"]?["summary"]?["deep"]?["minutes"]?.toString()),
+        lightMinutes = _parseInt(json["levels"]?["summary"]?["light"]?["minutes"]?.toString()),
+        remMinutes = _parseInt(json["levels"]?["summary"]?["rem"]?["minutes"]?.toString());
 
   @override
   String toString() {

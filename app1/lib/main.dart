@@ -9,7 +9,8 @@ import 'package:app1/screens/diaryPage.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:app1/providers/data_provider.dart';
-import 'package:app1/screens/homeProva.dart';
+import 'package:app1/widgets/my_drawer.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -20,43 +21,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Trial App1',
-      //home: OnboardingPage()
-      home: HomePage(),
-      //home: SplashPage(),
-      //home: LoginPage(),
-      //home: GoalPage()
-      //home: ProfilePage(),
-      //home: DiaryPage(),
-      //home: HomeProva(),
-      );
+    return ChangeNotifierProvider(
+      create: (_) => SleepDataProvider(), // Provide the SleepDataProvider to the tree below
+      child: MaterialApp(
+        title: 'Trial App1',
+        //home: OnboardingPage()
+        //home: HomePage(),
+        home: SplashPage(),
+        //home: LoginPage(),
+        //home: GoalPage()
+        //home: ProfilePage(),
+        //home: DiaryPage(),
+      ),
+    );
   }
 }
-
-
-
-
-
-
-
-//void main() {
-  //runApp(const MyApp());
-//}
-
-//class MyApp extends StatelessWidget {
-  //const MyApp({super.key});
-
-  //@override
-  //Widget build(BuildContext context) {
-    //return ChangeNotifierProvider(
-      //create: (_) => SleepDataProvider(), // Fornisce il provider a tutta l'app
-      //child: MaterialApp(
-        //title: 'Trial App1',
-        //home: HomeProva(),  // Usa HomePage, quella con il fetch dati e provider
-        //debugShowCheckedModeBanner: false,
-      //),
-    //);
-  //}
-//}
 

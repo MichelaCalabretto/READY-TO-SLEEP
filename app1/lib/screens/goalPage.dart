@@ -38,7 +38,6 @@
 
 
 import 'package:flutter/material.dart';
-import 'package:app1/screens/profilePage.dart';
 import 'package:app1/widgets/my_drawer.dart';
 
 class GoalPage extends StatelessWidget {
