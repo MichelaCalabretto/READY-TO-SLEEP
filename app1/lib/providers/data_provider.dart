@@ -8,55 +8,57 @@ class SleepDataProvider extends ChangeNotifier {
   List<SleepDataNight> nightData = [];
 
   Future<void> fetchSleepTrendData(String startDate, String endDate) async {
-    final data = await Impact.fetchSleepTrendData(startDate, endDate);
+    try {
+      final data = await Impact.fetchSleepTrendData(startDate, endDate);
+      print('RAW TREND RESPONSE: ${data?.toString()}');
 
-    print('fetchSleepTrendData response: $data'); // DEBUG
-
-    if (data != null) {
-      trendData.clear();
-
-      final list = data['data']['data'];
-      if (list is List) {
-        for (var item in list) {
-          final date = item['time'] ?? item['startTime'] ?? '';
-          print('Parsing trend item with date: $date'); // DEBUG
-
-          // Updated to use new constructor (no separate date param)
-          trendData.add(SleepDataTrend.fromJson(item));
+      if (data != null && data['data'] != null) {
+        trendData.clear();
+        
+        final items = data['data']['data'] ?? [];
+        if (items is List) {
+          for (var item in items) {
+            try {
+              print('PROCESSING TREND ITEM: $item');
+              trendData.add(SleepDataTrend.fromJson(item));
+            } catch (e, stack) {
+              print('Error processing trend item: $e\n$stack');
+            }
+          }
         }
-      } else {
-        print('Expected a List in trend data but got: ${list.runtimeType}');
+        
+        notifyListeners();
+        print('Successfully loaded ${trendData.length} trend items');
       }
-
-      notifyListeners();
-    } else {
-      print('fetchSleepTrendData returned null');
+    } catch (e, stack) {
+      print('Error in fetchSleepTrendData: $e\n$stack');
     }
   }
 
   Future<void> fetchSleepNightData(String day) async {
-    final data = await Impact.fetchSleepNightData(day);
+    try {
+      final data = await Impact.fetchSleepNightData(day);
+      print('RAW NIGHT RESPONSE: ${data?.toString()}');
 
-    print('fetchSleepNightData response: $data'); // DEBUG
-
-    if (data != null) {
-      nightData.clear();
-
-      final dynamic item = data['data']?['data'];
-      final String? date = data['data']?['date'];
-
-      print('Parsing night data for date: $date'); // DEBUG
-      print('Night data raw item: $item (type: ${item.runtimeType})'); // DEBUG
-
-      if (item != null && item is Map<String, dynamic> && date != null) {
-        nightData.add(SleepDataNight.fromJson(date, item));
-      } else {
-        print('Night data item is null or not a Map');
+      if (data != null && data['data'] != null) {
+        nightData.clear();
+        
+        final responseData = data['data']['data'];
+        final date = data['data']['date'];
+        
+        if (responseData is List && responseData.isNotEmpty && date != null) {
+          try {
+            nightData.add(SleepDataNight.fromJson(date, responseData.first));
+            print('Successfully loaded night data');
+          } catch (e, stack) {
+            print('Error processing night data: $e\n$stack');
+          }
+        }
+        
+        notifyListeners();
       }
-
-      notifyListeners();
-    } else {
-      print('fetchSleepNightData returned null');
+    } catch (e, stack) {
+      print('Error in fetchSleepNightData: $e\n$stack');
     }
   }
 

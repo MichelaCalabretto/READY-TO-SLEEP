@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
-import 'package:app1/models/sleep_data_night.dart';
-import 'package:app1/models/sleep_data_trend.dart';
+import 'package:provider/provider.dart'; // Import per Provider
+import 'package:app1/models/sleep_data_night.dart'; // Assicurati che il percorso sia corretto
+import 'package:app1/models/sleep_data_trend.dart'; // Assicurati che il percorso sia corretto
+import 'package:app1/providers/data_provider.dart'; // Assicurati che il percorso sia corretto per il tuo SleepDataProvider
+import 'dart:math';
 
 class ChartSwitcher extends StatefulWidget {
-  final List<SleepDataNight> sleepDataNights;
-  final List<SleepDataTrend> sleepDataTrends;
-
+  // Rimuoviamo i campi final sleepDataNights e sleepDataTrends
+  // in quanto i dati verranno ottenuti direttamente dal Provider.
   const ChartSwitcher({
     Key? key,
-    required this.sleepDataNights,
-    required this.sleepDataTrends,
   }) : super(key: key);
 
   @override
@@ -21,102 +21,121 @@ class ChartSwitcher extends StatefulWidget {
 class _ChartSwitcherState extends State<ChartSwitcher> {
   final PageController _pageController = PageController();
   int _currentIndex = 0;
-
-  // Define colors for theme consistency
   final Color themePurple = const Color.fromARGB(255, 38, 9, 68);
   final Color chartBgColor = Colors.white70;
-
-  // The selected date; initialized to yesterday on widget load
   late DateTime selectedDate;
 
   @override
   void initState() {
     super.initState();
-    // Set default selectedDate to yesterday (latest viable date)
     selectedDate = DateTime.now().subtract(const Duration(days: 1));
+    // Richiamiamo la funzione per caricare i dati all'inizializzazione del widget,
+    // dopo che il build è stato completato e il context è disponibile.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchDataForSelectedDate();
+    });
   }
 
-  // Filter sleep data for the exact selected date (night recap)
-  List<SleepDataNight> get filteredSleepDataNights {
-    return widget.sleepDataNights.where((data) {
+  // Funzione per richiamare il fetching dei dati dal Provider
+  void _fetchDataForSelectedDate() async {
+    // Ottieni l'istanza del provider senza ascoltare i cambiamenti (listen: false)
+    // perché lo useremo solo per chiamare i metodi di fetching.
+    final sleepProvider = Provider.of<SleepDataProvider>(context, listen: false);
+
+    // Formatta la data per le chiamate API
+    final String dayForNight = DateFormat('yyyy-MM-dd').format(selectedDate);
+    final String startDateForTrend = DateFormat('yyyy-MM-dd').format(selectedDate.subtract(const Duration(days: 6)));
+    final String endDateForTrend = DateFormat('yyyy-MM-dd').format(selectedDate);
+
+    await sleepProvider.fetchSleepNightData(dayForNight);
+    await sleepProvider.fetchSleepTrendData(startDateForTrend, endDateForTrend);
+  }
+
+  // I getter ora prenderanno i dati dall'istanza del provider passata
+  // nel metodo build tramite Consumer o Provider.of.
+  // Ho trasformato i getter in funzioni che accettano le liste complete dal provider.
+  List<SleepDataNight> _getFilteredSleepDataNights(List<SleepDataNight> allNightData) {
+    return allNightData.where((data) {
       return data.time.year == selectedDate.year &&
           data.time.month == selectedDate.month &&
           data.time.day == selectedDate.day;
     }).toList();
   }
 
-  // Filter sleep trends for 7-day period ending on selectedDate
-  List<SleepDataTrend> get filteredSleepDataTrends {
-    DateTime startDate = selectedDate.subtract(const Duration(days: 6));
-    return widget.sleepDataTrends.where((data) {
-      // Include data between startDate and selectedDate inclusive
-      return data.time.isAfter(startDate.subtract(const Duration(days: 1))) &&
-          data.time.isBefore(selectedDate.add(const Duration(days: 1)));
+  List<SleepDataTrend> _getFilteredSleepDataTrends(List<SleepDataTrend> allTrendData) {
+    final startDate = selectedDate.subtract(const Duration(days: 6));
+    return allTrendData.where((data) {
+      return !data.time.isBefore(startDate) &&
+             !data.time.isAfter(selectedDate);
     }).toList();
   }
 
-  // Chart title changes depending on which chart page is visible
   String get chartTitle {
-    switch (_currentIndex) {
-      case 0:
-        return "Tonight's Recap";
-      case 1:
-        return "Trend of the Last 7 Days";
-      default:
-        return '';
-    }
+    return _currentIndex == 0 ? "Tonight's Recap" : "7-Day Trend";
   }
 
-  // Build Bar Chart for single night sleep data
-  Widget _buildBarChart() {
-    // Show a message if no data available for the selected date
-    if (filteredSleepDataNights.isEmpty) {
+  // Le funzioni _buildBarChart e _buildLineChart ora accetteranno
+  // i dati filtrati come parametro.
+  Widget _buildBarChart(List<SleepDataNight> filteredData) {
+    if (filteredData.isEmpty) {
       return const Center(
         child: Text(
-          'No data available for the selected night.',
+          'No night data available',
           style: TextStyle(color: Colors.white),
         ),
       );
     }
 
-    final data = filteredSleepDataNights.first;
+    final data = filteredData.first;
+    // Usiamo direttamente i campi senza '?? 0' perché SleepDataNight.fromJson
+    // gestisce già i valori nulli e li imposta a 0.
+    final deepHours = data.deepMinutes / 60;
+    final lightHours = data.lightMinutes / 60;
+    final remHours = data.remMinutes / 60;
 
-    // Create bar groups for Deep, Light, and REM sleep durations (converted to hours)
-    final barGroups = <BarChartGroupData>[
-      BarChartGroupData(x: 0, barRods: [
-        BarChartRodData(toY: data.deepMinutes / 60, color: themePurple, width: 20)
-      ], showingTooltipIndicators: [0]),
-      BarChartGroupData(x: 1, barRods: [
-        BarChartRodData(toY: data.lightMinutes / 60, color: themePurple, width: 20)
-      ], showingTooltipIndicators: [0]),
-      BarChartGroupData(x: 2, barRods: [
-        BarChartRodData(toY: data.remMinutes / 60, color: themePurple, width: 20)
-      ], showingTooltipIndicators: [0]),
-    ];
+    final maxY = [deepHours, lightHours, remHours].reduce(max).ceilToDouble();
 
-    // Return styled BarChart widget wrapped in a decorated container
     return Container(
+      height: 300,
       decoration: BoxDecoration(
         color: chartBgColor,
         borderRadius: BorderRadius.circular(16),
       ),
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(16),
       child: BarChart(
         BarChartData(
-          backgroundColor: Colors.transparent,
-          barGroups: barGroups,
+          barGroups: [
+            BarChartGroupData(
+              x: 0,
+              barRods: [
+                BarChartRodData(toY: deepHours, color: themePurple, width: 20)
+              ],
+            ),
+            BarChartGroupData(
+              x: 1,
+              barRods: [
+                BarChartRodData(toY: lightHours, color: themePurple, width: 20)
+              ],
+            ),
+            BarChartGroupData(
+              x: 2,
+              barRods: [
+                BarChartRodData(toY: remHours, color: themePurple, width: 20)
+              ],
+            ),
+          ],
           titlesData: FlTitlesData(
             bottomTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
-                getTitlesWidget: (value, _) {
+                getTitlesWidget: (value, meta) {
                   switch (value.toInt()) {
                     case 0:
-                      return const Text('Deep');
+                      return const Text('Deep', style: TextStyle(fontSize: 12));
                     case 1:
-                      return const Text('Light');
+                      return const Text('Light', style: TextStyle(fontSize: 12));
                     case 2:
-                      return const Text('REM');
+                      return const Text('REM', style: TextStyle(fontSize: 12));
                     default:
                       return const Text('');
                   }
@@ -124,72 +143,71 @@ class _ChartSwitcherState extends State<ChartSwitcher> {
               ),
             ),
             leftTitles: AxisTitles(
-              sideTitles: SideTitles(showTitles: true, reservedSize: 32),
+              sideTitles: SideTitles(
+                showTitles: true,
+                getTitlesWidget: (value, meta) {
+                  return Text('${value.toInt()}h',
+                      style: const TextStyle(fontSize: 12));
+                },
+                reservedSize: 40,
+              ),
             ),
-            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
           ),
-          // Enable tooltip on bar touch
-          barTouchData: BarTouchData(
-            enabled: true,
-            touchTooltipData: BarTouchTooltipData(
-              tooltipBgColor: Colors.black87,
-              getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                final stage = ['Deep Sleep', 'Light Sleep', 'REM Sleep'][group.x.toInt()];
-                return BarTooltipItem(
-                  '$stage: ${rod.toY.toStringAsFixed(2)} hrs',
-                  const TextStyle(color: Colors.white),
-                );
-              },
-            ),
-          ),
+          borderData: FlBorderData(show: false),
+          gridData: FlGridData(show: true),
+          maxY: maxY > 0 ? maxY + 1 : 5, // Add some padding
         ),
       ),
     );
   }
 
-  // Build Line Chart for 7-day sleep trend data
-  Widget _buildLineChart() {
-    if (filteredSleepDataTrends.isEmpty) {
+  Widget _buildLineChart(List<SleepDataTrend> filteredData) {
+    if (filteredData.isEmpty) {
       return const Center(
         child: Text(
-          'No data available for the selected period.',
+          'No trend data available',
           style: TextStyle(color: Colors.white),
         ),
       );
     }
 
-    // Create FlSpots with x = days offset from start of 7-day window, y = duration in hours
-    final spots = filteredSleepDataTrends.map((data) {
-      final daysAgo = selectedDate.difference(data.time).inDays;
-
-      // Safely parse duration regardless of it being int, double, or String
-      double duration;
-      if (data.duration is String) {
-        duration = double.tryParse(data.duration as String) ?? 0.0;
-      } else if (data.duration is int) {
-        duration = (data.duration as int).toDouble();
-      } else if (data.duration is double) {
-        duration = data.duration as double;
-      } else {
-        duration = 0.0;
-      }
-
-      return FlSpot(
-        (6 - daysAgo).toDouble(),
-        duration / 60,
-      );
+    final spots = filteredData.map((data) {
+      final daysFromStart = data.time
+          .difference(selectedDate.subtract(const Duration(days: 6)))
+          .inDays
+          .toDouble();
+      return FlSpot(daysFromStart, data.duration / 60); // Convert to hours
     }).toList();
 
+    // Ordina i punti per x per garantire la corretta visualizzazione nel LineChart
+    spots.sort((a, b) => a.x.compareTo(b.x));
+
+    // Determina min/max Y per il grafico in base ai dati effettivi
+    double minY = spots.isNotEmpty ? spots.map((e) => e.y).reduce(min) : 0;
+    double maxY = spots.isNotEmpty ? spots.map((e) => e.y).reduce(max) : 5;
+
+    // Aggiungi un po' di padding e assicurati un intervallo ragionevole di default
+    minY = (minY - 1).floorToDouble();
+    if (minY < 0) minY = 0;
+    maxY = (maxY + 1).ceilToDouble();
+    if (maxY <= 1) maxY = 5; // Assicurati un intervallo minimo
+
+
     return Container(
+      height: 300,
       decoration: BoxDecoration(
         color: chartBgColor,
         borderRadius: BorderRadius.circular(16),
       ),
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(16),
       child: LineChart(
         LineChartData(
-          backgroundColor: Colors.transparent,
+          minX: 0,
+          maxX: 6, // Sempre 7 giorni (0-6)
+          minY: minY,
+          maxY: maxY,
           lineBarsData: [
             LineChartBarData(
               spots: spots,
@@ -197,132 +215,106 @@ class _ChartSwitcherState extends State<ChartSwitcher> {
               color: themePurple,
               barWidth: 4,
               dotData: FlDotData(show: true),
+              belowBarData: BarAreaData(show: false),
             ),
           ],
           titlesData: FlTitlesData(
             bottomTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
-                reservedSize: 40,
-                getTitlesWidget: (value, _) {
-                  // Show day abbreviations (Mon, Tue, etc) for bottom axis
-                  final date = selectedDate.subtract(Duration(days: 6 - value.toInt()));
-                  return Text(DateFormat('E').format(date), style: const TextStyle(fontSize: 12));
+                getTitlesWidget: (value, meta) {
+                  final date =
+                      selectedDate.subtract(Duration(days: 6 - value.toInt()));
+                  return Text(DateFormat('E').format(date),
+                      style: const TextStyle(fontSize: 12));
                 },
+                reservedSize: 32,
+                interval: 1, // Mostra i titoli per ogni giorno
               ),
             ),
             leftTitles: AxisTitles(
-              sideTitles: SideTitles(showTitles: true, reservedSize: 32),
+              sideTitles: SideTitles(
+                showTitles: true,
+                getTitlesWidget: (value, meta) {
+                  return Text('${value.toInt()}h',
+                      style: const TextStyle(fontSize: 12));
+                },
+                reservedSize: 40,
+                interval: 1, // Mostra le etichette delle ore intere
+              ),
             ),
-            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
           ),
-          // Enable tooltip on line touch
-          lineTouchData: LineTouchData(
-            enabled: true,
-            touchTooltipData: LineTouchTooltipData(
-              tooltipBgColor: Colors.black87,
-              getTooltipItems: (touchedSpots) {
-                return touchedSpots.map((spot) {
-                  return LineTooltipItem(
-                    'Duration: ${spot.y.toStringAsFixed(2)} hrs',
-                    const TextStyle(color: Colors.white),
-                  );
-                }).toList();
-              },
-            ),
-          ),
+          gridData: FlGridData(show: true),
+          borderData: FlBorderData(show: false),
         ),
       ),
     );
   }
 
-  // Dot indicators to show which chart page is active
-  Widget _buildDotIndicators() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(2, (index) {
-        return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          width: _currentIndex == index ? 12 : 8,
-          height: _currentIndex == index ? 12 : 8,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: _currentIndex == index ? Colors.white : Colors.white54,
-          ),
+  @override
+  Widget build(BuildContext context) {
+    // Usa Consumer per accedere ai dati forniti da SleepDataProvider e reagire ai cambiamenti.
+    return Consumer<SleepDataProvider>(
+      builder: (context, sleepProvider, child) {
+        // Ottieni i dati più recenti dal provider e poi filtrali.
+        final filteredSleepDataNights = _getFilteredSleepDataNights(sleepProvider.nightData);
+        final filteredSleepDataTrends = _getFilteredSleepDataTrends(sleepProvider.trendData);
+
+        return Column(
+          children: [
+            ElevatedButton.icon(
+              onPressed: () => _selectDate(context),
+              icon: const Icon(Icons.calendar_today, size: 18),
+              label: Text(DateFormat.yMMMd().format(selectedDate)),
+            ),
+            const SizedBox(height: 8),
+            Text(chartTitle, style: const TextStyle(color: Colors.white, fontSize: 20)),
+            const SizedBox(height: 16),
+            SizedBox(
+              height: 350, // Fixed height for the chart area
+              child: PageView(
+                controller: _pageController,
+                onPageChanged: (index) => setState(() => _currentIndex = index),
+                // Passa i dati filtrati alle funzioni di costruzione del grafico
+                children: [
+                  _buildBarChart(filteredSleepDataNights),
+                  _buildLineChart(filteredSleepDataTrends)
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [0, 1].map((i) => Container(
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                width: _currentIndex == i ? 12 : 8,
+                height: _currentIndex == i ? 12 : 8,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: _currentIndex == i ? Colors.white : Colors.white54,
+                ),
+              )).toList(),
+            ),
+          ],
         );
-      }),
+      },
     );
   }
 
-  // Show date picker dialog allowing user to pick a date up to yesterday only
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: selectedDate,
-      firstDate: DateTime(2000), // earliest selectable date
-      lastDate: DateTime.now().subtract(const Duration(days: 1)), // yesterday is max
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now().subtract(const Duration(days: 1)),
     );
     if (picked != null && picked != selectedDate) {
-      // Update selectedDate and refresh UI to update charts
       setState(() {
         selectedDate = picked;
+        _fetchDataForSelectedDate(); // Richiama il fetching dei dati per la nuova data
       });
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Date selector button with calendar icon and formatted date text
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: ElevatedButton.icon(
-            onPressed: () => _selectDate(context),
-            icon: const Icon(Icons.calendar_today, size: 18),
-            // Show selected date formatted 
-            label: Text(DateFormat.yMMMd().format(selectedDate)),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: themePurple,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-          ),
-        ),
-
-        // Chart title depends on current chart page
-        Text(
-          chartTitle,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-            shadows: [Shadow(blurRadius: 4, color: Colors.black54, offset: Offset(1, 1))],
-          ),
-        ),
-
-        const SizedBox(height: 16),
-
-        // Chart area with PageView to switch between bar chart and line chart
-        SizedBox(
-          height: 300,
-          child: PageView(
-            controller: _pageController,
-            onPageChanged: (index) {
-              setState(() => _currentIndex = index);
-            },
-            children: [
-              Padding(padding: const EdgeInsets.all(16), child: _buildBarChart()),
-              Padding(padding: const EdgeInsets.all(16), child: _buildLineChart()),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 12),
-        // Show dots for page indicator below the chart
-        _buildDotIndicators(),
-      ],
-    );
   }
 }

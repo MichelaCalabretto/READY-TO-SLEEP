@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:app1/screens/homePage.dart';
+import 'package:app1/screens/goalPage.dart';
 import 'package:app1/screens/onboardingPage.dart';
 import 'package:app1/utils/impact.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:app1/screens/homePage.dart';
 
 class LoginPage extends StatelessWidget {
   LoginPage({Key? key}) : super(key: key);
