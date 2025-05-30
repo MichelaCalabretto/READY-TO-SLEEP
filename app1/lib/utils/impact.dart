@@ -66,7 +66,8 @@ class Impact {
     }
   }
 
-  static Future<dynamic> fetchSleepTrendData(String startDate, String endDate) async {
+  /// Fetch raw JSON data for sleep trend (multiple days) within a date range.
+  static Future<Map<String, dynamic>?> fetchSleepTrendData(String startDate, String endDate) async {
     final sp = await SharedPreferences.getInstance();
     var access = sp.getString('access');
 
@@ -90,28 +91,8 @@ class Impact {
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
-        
-        // --- START OF REVISED MODIFICATION ---
-        int trendItemsCount = 0;
-        if (decoded is Map && decoded['data'] is List) {
-          final List<dynamic> outerDataList = decoded['data'];
-          if (outerDataList.isNotEmpty) {
-            for (var dailyEntry in outerDataList) {
-              // IMPORTANT: Add another check for the inner 'data' field type
-              if (dailyEntry is Map && dailyEntry['data'] is List) {
-                // Now it's safe to cast and access length
-                trendItemsCount += (dailyEntry['data'] as List<dynamic>).length;
-              } else {
-                // This will catch the case where dailyEntry['data'] is a String or something else
-                print('Warning: dailyEntry for date ${dailyEntry['date']} does not contain a List for "data": ${dailyEntry['data']}');
-              }
-            }
-          }
-        }
-        print('Successfully fetched $trendItemsCount trend items');
-        // --- END OF REVISED MODIFICATION ---
-        
-        return decoded;
+        print('$decoded'); //for debugging
+        return decoded as Map<String, dynamic>;
       } else {
         print('Trend data request failed: ${response.body}');
         return null;
@@ -122,7 +103,8 @@ class Impact {
     }
   }
 
-  static Future<dynamic> fetchSleepNightData(String day) async {
+  /// Fetch raw JSON data for a single night's sleep.
+  static Future<Map<String, dynamic>?> fetchSleepNightData(String day) async {
     final sp = await SharedPreferences.getInstance();
     var access = sp.getString('access');
 
@@ -146,8 +128,8 @@ class Impact {
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
-        print('Successfully fetched night data for $day');
-        return decoded;
+        print('$decoded'); //for debugging
+        return decoded as Map<String, dynamic>;
       } else {
         print('Night data request failed: ${response.body}');
         return null;

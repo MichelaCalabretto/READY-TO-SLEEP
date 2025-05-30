@@ -1,82 +1,59 @@
 import 'package:intl/intl.dart';
 
 class SleepDataNight {
-  final DateTime time;
+  final String time; /// the date of the night in yyyy-MM-dd format (from the button in the home page).
   final int duration;
   final int minutesToFallAsleep;
   final int minutesAwake;
-  final int minutesAfterWakeUp;
-  final int deepMinutes;
-  final int lightMinutes;
-  final int remMinutes;
+  final int minutesRem;
+  final int minutesDeep;
+  final int minutesLight;
 
   SleepDataNight({
     required this.time,
     required this.duration,
     required this.minutesToFallAsleep,
     required this.minutesAwake,
-    required this.minutesAfterWakeUp,
-    required this.deepMinutes,
-    required this.lightMinutes,
-    required this.remMinutes,
+    required this.minutesRem,
+    required this.minutesDeep,
+    required this.minutesLight,
   });
 
-  // Helper to safely parse int from dynamic
-  static int _parseInt(dynamic value) {
-    if (value == null) return 0; // Handle null values safely
-    if (value is int) return value;
-    if (value is String) {
-      // Clean the string before parsing, e.g., remove non-numeric chars if any
-      return int.tryParse(value.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+  /// Factory method that safely parses inconsistent 'data' formats (ometimes 'data' ia a Map, sometimes a List of Maps, sometimes it's empty or malformed)
+  /// factory constructor can return a new instance of a class, and can include logic or conditions before deciding what to return; it also doesn't need to create a new object every time
+  static SleepDataNight? fromApiData(String fullDate, dynamic data) {
+    if (data == null) return null;
+
+    if (data is List && data.isNotEmpty && data.first is Map<String, dynamic>) { //data is a List
+                                                                                 //data.first is Map<...> ensures that the first element is a valid Map
+      return SleepDataNight.fromJson(fullDate, data.first);
     }
-    return 0;
+
+    if (data is Map<String, dynamic>) { //data is already a single Map, and not inside a List
+      return SleepDataNight.fromJson(fullDate, data);
+    }
+
+    return null;
   }
 
-  SleepDataNight.fromJson(String date, Map<String, dynamic> json)
-      : time = _parseDateTimeForNight(date, json["startTime"]),
-        duration = (_parseInt(json["duration"]) ~/ 60000),
-        minutesToFallAsleep = _parseInt(json["minutesToFallAsleep"]),
-        minutesAwake = _parseInt(json["minutesAwake"]),
-        minutesAfterWakeUp = _parseInt(json["minutesAfterWakeUp"]),
-        deepMinutes = _parseInt(json["levels"]?["summary"]?["deep"]?["minutes"]),
-        lightMinutes = _parseInt(json["levels"]?["summary"]?["light"]?["minutes"]),
-        remMinutes = _parseInt(json["levels"]?["summary"]?["rem"]?["minutes"]);
-
-  static DateTime _parseDateTimeForNight(String date, dynamic startTime) {
-    String cleanedTime = "00:00:00"; // Fallback di default
-    if (startTime is String) {
-      // Questo regex cerca il pattern "HH:MM:SS" (due cifre : due cifre : due cifre)
-      // all'interno della stringa startTime, preferendo l'ultimo occorrenza
-      // per catturare l'ora effettiva di inizio del sonno.
-      final RegExp timeRegex = RegExp(r'(\d{2}:\d{2}:\d{2})$');
-      final match = timeRegex.firstMatch(startTime);
-
-      if (match != null) {
-        cleanedTime = match.group(0)!; // Prende la stringa corrispondente all'intero match
-      } else {
-        print('Warning: Could not find HH:MM:SS pattern in startTime string "$startTime"'); // DEBUG
-      }
-    }
-
-    final String fullDateTimeString = '$date $cleanedTime';
-    print('Attempting to parse night date: $fullDateTimeString'); // DEBUG
-
-    try {
-      return DateFormat('yyyy-MM-dd HH:mm:ss').parse(fullDateTimeString);
-    } catch (e) {
-      print('Error parsing SleepDataNight time string "$fullDateTimeString": $e');
-      // Fallback: parse only the date part if time causes issues
-      try {
-        return DateFormat('yyyy-MM-dd').parse(date);
-      } catch (dateError) {
-        print('Error parsing only date part: $dateError');
-        return DateTime.now(); // Final fallback
-      }
-    }
-  }
+  /// Constructor to create a SleepDataNight object from JSON-like data
+  /// - [fullDate] is the full date string for the night in yyyy-MM-dd format
+  /// - [json] is the sleep record map from the API
+  SleepDataNight.fromJson(String fullDate, Map<String, dynamic> json)
+    : time = fullDate, // Directly assign the provided date
+      duration = (json['duration'] ?? 0) ~/ 60000, // Convert duration from ms to minutes (~/ = integer division)
+      minutesToFallAsleep = json['minutesToFallAsleep'] ?? 0, // Use 0 if the value is missing
+      minutesAwake = json['minutesAwake'] ?? 0, 
+      minutesRem = json['levels']?['summary']?['rem']?['minutes'] ?? 0, // Safe access: if 'rem' or 'minutes' is missing, fallback to 0
+      minutesDeep = json['levels']?['summary']?['deep']?['minutes'] ?? 0, 
+      minutesLight = json['levels']?['summary']?['light']?['minutes'] ?? 0; 
 
   @override
   String toString() {
-    return 'SleepDataNight(time: $time, duration: $duration, deep: $deepMinutes, light: $lightMinutes, rem: $remMinutes)';
+    return 'SleepDataNight(time: $time, duration: $duration min, '
+           'minutesToFallAsleep: $minutesToFallAsleep min, '
+           'minutesAwake: $minutesAwake min, minutesRem: $minutesRem min, '
+           'minutesDeep: $minutesDeep min, minutesLight: $minutesLight min)';
   }
 }
+

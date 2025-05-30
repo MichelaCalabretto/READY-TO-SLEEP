@@ -1,320 +1,202 @@
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
+import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart'; // Import per Provider
-import 'package:app1/models/sleep_data_night.dart'; // Assicurati che il percorso sia corretto
-import 'package:app1/models/sleep_data_trend.dart'; // Assicurati che il percorso sia corretto
-import 'package:app1/providers/data_provider.dart'; // Assicurati che il percorso sia corretto per il tuo SleepDataProvider
-import 'dart:math';
+import 'package:app1/models/sleep_data_trend.dart';
+import 'package:app1/models/sleep_data_night.dart';
+import 'package:app1/providers/data_provider.dart'; 
+import 'package:app1/widgets/graph1.dart'; 
+import 'package:app1/widgets/graph2.dart'; 
 
 class ChartSwitcher extends StatefulWidget {
-  // Rimuoviamo i campi final sleepDataNights e sleepDataTrends
-  // in quanto i dati verranno ottenuti direttamente dal Provider.
-  const ChartSwitcher({
-    Key? key,
-  }) : super(key: key);
+  const ChartSwitcher({Key? key}) : super(key: key);
 
   @override
-  _ChartSwitcherState createState() => _ChartSwitcherState();
+  State<ChartSwitcher> createState() => _ChartSwitcherState();
 }
 
 class _ChartSwitcherState extends State<ChartSwitcher> {
-  final PageController _pageController = PageController();
-  int _currentIndex = 0;
-  final Color themePurple = const Color.fromARGB(255, 38, 9, 68);
-  final Color chartBgColor = Colors.white70;
-  late DateTime selectedDate;
+  final PageController _pageController = PageController(); // Controller for swiping between charts
+  int _currentPage = 0; // Currently selected page index (0 = Graph1, 1 = Graph2)
+  late DateTime _selectedDate; // Selected date by the user, default to yesterday
+                               // late means that the variable will be initialized later on, and not here
+
+  // Colors matching Graph2 style
+  final Color darkPurple = const Color.fromARGB(255, 38, 9, 68);
+  final Color lilla = const Color.fromARGB(255, 192, 153, 227);
+  final Color whiteShade = Colors.white70;
+  final Color whiteStrong = Colors.white;
 
   @override
   void initState() {
     super.initState();
-    selectedDate = DateTime.now().subtract(const Duration(days: 1));
-    // Richiamiamo la funzione per caricare i dati all'inizializzazione del widget,
-    // dopo che il build è stato completato e il context è disponibile.
+    _selectedDate = DateTime.now().subtract(const Duration(days: 1)); // default: yesterday
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _fetchDataForSelectedDate();
+      _fetchDataForDate(_selectedDate);
     });
+    // Changed to addPostFrameCallback to avoid calling async during initState build cycle
   }
 
-  // Funzione per richiamare il fetching dei dati dal Provider
-  void _fetchDataForSelectedDate() async {
-    // Ottieni l'istanza del provider senza ascoltare i cambiamenti (listen: false)
-    // perché lo useremo solo per chiamare i metodi di fetching.
-    final sleepProvider = Provider.of<SleepDataProvider>(context, listen: false);
-
-    // Formatta la data per le chiamate API
-    final String dayForNight = DateFormat('yyyy-MM-dd').format(selectedDate);
-    final String startDateForTrend = DateFormat('yyyy-MM-dd').format(selectedDate.subtract(const Duration(days: 6)));
-    final String endDateForTrend = DateFormat('yyyy-MM-dd').format(selectedDate);
-
-    await sleepProvider.fetchSleepNightData(dayForNight);
-    await sleepProvider.fetchSleepTrendData(startDateForTrend, endDateForTrend);
+  // Helper to format date as "MMM d, yyyy" (e.g., May 28, 2025)
+  String _formatFullDate(DateTime date) { //format to show on the date button
+    return DateFormat('MMM d, yyyy').format(date);
   }
 
-  // I getter ora prenderanno i dati dall'istanza del provider passata
-  // nel metodo build tramite Consumer o Provider.of.
-  // Ho trasformato i getter in funzioni che accettano le liste complete dal provider.
-  List<SleepDataNight> _getFilteredSleepDataNights(List<SleepDataNight> allNightData) {
-    return allNightData.where((data) {
-      return data.time.year == selectedDate.year &&
-          data.time.month == selectedDate.month &&
-          data.time.day == selectedDate.day;
-    }).toList();
+  // Compute startDate for 7-day range ending at endDate
+  String _computeStartDate(DateTime endDate) { //to extract the startDate from the endDate to give in input to the fetchSleepTrendData
+    final startDate = endDate.subtract(const Duration(days: 6));
+    return DateFormat('yyyy-MM-dd').format(startDate);
   }
 
-  List<SleepDataTrend> _getFilteredSleepDataTrends(List<SleepDataTrend> allTrendData) {
-    final startDate = selectedDate.subtract(const Duration(days: 6));
-    return allTrendData.where((data) {
-      return !data.time.isBefore(startDate) &&
-             !data.time.isAfter(selectedDate);
-    }).toList();
+  // Format date as yyyy-MM-dd string (API format)
+  String _formatDateForApi(DateTime date) { //format for fetchData methods
+    return DateFormat('yyyy-MM-dd').format(date);
   }
 
-  String get chartTitle {
-    return _currentIndex == 0 ? "Tonight's Recap" : "7-Day Trend";
+  // Fetch trend and night data for the selected date
+  Future<void> _fetchDataForDate(DateTime date) async {
+    final provider = context.read<SleepDataProvider>(); //to get an instance of the SleepDataProvider from the current widget context (to then call the fetchData methods defined in the provider)
+                                                        //context.read<T>() to access the provider without listening to changes (since I'm just fetching the data here)
+
+    final endDateStr = _formatDateForApi(date); //computes the dates in the right format for the API request
+    final startDateStr = _computeStartDate(date);
+
+    await provider.fetchSleepTrendData(startDateStr, endDateStr); // Fetch sleep trend data for 7 days ending at selected date
+    await provider.fetchSleepNightData(endDateStr);  // Fetch detailed night data for the selected date (fullDate)
   }
 
-  // Le funzioni _buildBarChart e _buildLineChart ora accetteranno
-  // i dati filtrati come parametro.
-  Widget _buildBarChart(List<SleepDataNight> filteredData) {
-    if (filteredData.isEmpty) {
-      return const Center(
-        child: Text(
-          'No night data available',
-          style: TextStyle(color: Colors.white),
-        ),
-      );
-    }
+  /// Show date picker dialog, limited up to yesterday
+  Future<void> _pickDate() async {
+    final now = DateTime.now();
+    final yesterday = now.subtract(const Duration(days: 1));
 
-    final data = filteredData.first;
-    // Usiamo direttamente i campi senza '?? 0' perché SleepDataNight.fromJson
-    // gestisce già i valori nulli e li imposta a 0.
-    final deepHours = data.deepMinutes / 60;
-    final lightHours = data.lightMinutes / 60;
-    final remHours = data.remMinutes / 60;
-
-    final maxY = [deepHours, lightHours, remHours].reduce(max).ceilToDouble();
-
-    return Container(
-      height: 300,
-      decoration: BoxDecoration(
-        color: chartBgColor,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: BarChart(
-        BarChartData(
-          barGroups: [
-            BarChartGroupData(
-              x: 0,
-              barRods: [
-                BarChartRodData(toY: deepHours, color: themePurple, width: 20)
-              ],
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate, //initial date: date selected on default when the data picker opens
+      firstDate: DateTime(2020), // first date aviable for picking
+      lastDate: yesterday,
+      builder: (context, child) {
+        // Light theme inside the calendar with darkPurple text and lilla highlight on selected day
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: lilla, // selected day background
+              onPrimary: whiteStrong, // selected day text color
+              onSurface: darkPurple, // unselected day text color
+              surface: whiteStrong, // background of the calendar
             ),
-            BarChartGroupData(
-              x: 1,
-              barRods: [
-                BarChartRodData(toY: lightHours, color: themePurple, width: 20)
-              ],
-            ),
-            BarChartGroupData(
-              x: 2,
-              barRods: [
-                BarChartRodData(toY: remHours, color: themePurple, width: 20)
-              ],
-            ),
-          ],
-          titlesData: FlTitlesData(
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                getTitlesWidget: (value, meta) {
-                  switch (value.toInt()) {
-                    case 0:
-                      return const Text('Deep', style: TextStyle(fontSize: 12));
-                    case 1:
-                      return const Text('Light', style: TextStyle(fontSize: 12));
-                    case 2:
-                      return const Text('REM', style: TextStyle(fontSize: 12));
-                    default:
-                      return const Text('');
-                  }
-                },
+            dialogBackgroundColor: whiteStrong, // background of dialog outside calendar if any
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: darkPurple, // cancel/confirm buttons color
               ),
             ),
-            leftTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                getTitlesWidget: (value, meta) {
-                  return Text('${value.toInt()}h',
-                      style: const TextStyle(fontSize: 12));
-                },
-                reservedSize: 40,
-              ),
-            ),
-            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
           ),
-          borderData: FlBorderData(show: false),
-          gridData: FlGridData(show: true),
-          maxY: maxY > 0 ? maxY + 1 : 5, // Add some padding
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+      });
+      _fetchDataForDate(picked);
+    }
+  }
+
+  /// Widget for the date picker button above the charts
+  Widget _buildDatePickerButton() {
+    return Align(
+      alignment: Alignment.centerRight, 
+      child: ElevatedButton.icon(
+        onPressed: _pickDate,
+        icon: Icon(Icons.calendar_today, color: darkPurple),
+        label: Text(
+          _formatFullDate(_selectedDate),
+          style: TextStyle(color: darkPurple, fontWeight: FontWeight.bold),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: whiteStrong, // white button background
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          elevation: 0,
         ),
       ),
     );
   }
 
-  Widget _buildLineChart(List<SleepDataTrend> filteredData) {
-    if (filteredData.isEmpty) {
-      return const Center(
-        child: Text(
-          'No trend data available',
-          style: TextStyle(color: Colors.white),
-        ),
-      );
-    }
-
-    final spots = filteredData.map((data) {
-      final daysFromStart = data.time
-          .difference(selectedDate.subtract(const Duration(days: 6)))
-          .inDays
-          .toDouble();
-      return FlSpot(daysFromStart, data.duration / 60); // Convert to hours
-    }).toList();
-
-    // Ordina i punti per x per garantire la corretta visualizzazione nel LineChart
-    spots.sort((a, b) => a.x.compareTo(b.x));
-
-    // Determina min/max Y per il grafico in base ai dati effettivi
-    double minY = spots.isNotEmpty ? spots.map((e) => e.y).reduce(min) : 0;
-    double maxY = spots.isNotEmpty ? spots.map((e) => e.y).reduce(max) : 5;
-
-    // Aggiungi un po' di padding e assicurati un intervallo ragionevole di default
-    minY = (minY - 1).floorToDouble();
-    if (minY < 0) minY = 0;
-    maxY = (maxY + 1).ceilToDouble();
-    if (maxY <= 1) maxY = 5; // Assicurati un intervallo minimo
-
-
-    return Container(
-      height: 300,
-      decoration: BoxDecoration(
-        color: chartBgColor,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: LineChart(
-        LineChartData(
-          minX: 0,
-          maxX: 6, // Sempre 7 giorni (0-6)
-          minY: minY,
-          maxY: maxY,
-          lineBarsData: [
-            LineChartBarData(
-              spots: spots,
-              isCurved: true,
-              color: themePurple,
-              barWidth: 4,
-              dotData: FlDotData(show: true),
-              belowBarData: BarAreaData(show: false),
-            ),
-          ],
-          titlesData: FlTitlesData(
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                getTitlesWidget: (value, meta) {
-                  final date =
-                      selectedDate.subtract(Duration(days: 6 - value.toInt()));
-                  return Text(DateFormat('E').format(date),
-                      style: const TextStyle(fontSize: 12));
-                },
-                reservedSize: 32,
-                interval: 1, // Mostra i titoli per ogni giorno
-              ),
-            ),
-            leftTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                getTitlesWidget: (value, meta) {
-                  return Text('${value.toInt()}h',
-                      style: const TextStyle(fontSize: 12));
-                },
-                reservedSize: 40,
-                interval: 1, // Mostra le etichette delle ore intere
-              ),
-            ),
-            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+  /// Dot indicators for the current page under the charts
+  Widget _buildPageIndicator() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(2, (index) { //generates a list of two widgets, one per page; index is the index of the page (0 or 1)
+        bool isActive = index == _currentPage;
+        return AnimatedContainer( //animation for the dots
+          duration: const Duration(milliseconds: 300),
+          margin: const EdgeInsets.symmetric(horizontal: 6), //space between the dots
+          width: isActive ? 14 : 10, //to change the dimension of the dot when active
+          height: isActive ? 14 : 10,
+          decoration: BoxDecoration(
+            color: isActive ? lilla : whiteShade, //highlight with lilla, inactive dots whiteShade
+            shape: BoxShape.circle, //dot shape
           ),
-          gridData: FlGridData(show: true),
-          borderData: FlBorderData(show: false),
-        ),
-      ),
+        );
+      }),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    // Usa Consumer per accedere ai dati forniti da SleepDataProvider e reagire ai cambiamenti.
+    // Listen to SleepDataProvider for data updates
     return Consumer<SleepDataProvider>(
-      builder: (context, sleepProvider, child) {
-        // Ottieni i dati più recenti dal provider e poi filtrali.
-        final filteredSleepDataNights = _getFilteredSleepDataNights(sleepProvider.nightData);
-        final filteredSleepDataTrends = _getFilteredSleepDataTrends(sleepProvider.trendData);
+      builder: (context, provider, _) {
+        // Pass data to Graph widgets
+        final trendData = provider.sleepTrendData;
+        final nightData = provider.sleepNightData;
 
-        return Column(
-          children: [
-            ElevatedButton.icon(
-              onPressed: () => _selectDate(context),
-              icon: const Icon(Icons.calendar_today, size: 18),
-              label: Text(DateFormat.yMMMd().format(selectedDate)),
-            ),
-            const SizedBox(height: 8),
-            Text(chartTitle, style: const TextStyle(color: Colors.white, fontSize: 20)),
-            const SizedBox(height: 16),
-            SizedBox(
-              height: 350, // Fixed height for the chart area
-              child: PageView(
-                controller: _pageController,
-                onPageChanged: (index) => setState(() => _currentIndex = index),
-                // Passa i dati filtrati alle funzioni di costruzione del grafico
-                children: [
-                  _buildBarChart(filteredSleepDataNights),
-                  _buildLineChart(filteredSleepDataTrends)
-                ],
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [0, 1].map((i) => Container(
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                width: _currentIndex == i ? 12 : 8,
-                height: _currentIndex == i ? 12 : 8,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: _currentIndex == i ? Colors.white : Colors.white54,
+        return Container(
+          padding: const EdgeInsets.all(16),
+          // transparent background as requested
+          color: Colors.transparent,
+          child: Column(
+            mainAxisSize: MainAxisSize.min, //so that the column will take only the minimum space needed, based on its children
+            children: [
+              _buildDatePickerButton(),
+              const SizedBox(height: 12),
+
+              // Swipeable charts area
+              SizedBox(
+                height: 320, // enough height for the graph + padding
+                child: PageView( //widget to swipe horizontally between the two charts
+                  controller: _pageController, //page visible at the moment
+                  onPageChanged: (page) { //everytime the page changes, the _currentPage will be changed conseguentely
+                    setState(() {
+                      _currentPage = page;
+                    });
+                  },
+                  children: [
+                    // Graph1 expects SleepDataNight? for a single night
+                    Graph1(
+                      key: ValueKey(_formatDateForApi(_selectedDate)), // Use a ValueKey based on the selected date string
+                      sleepData: nightData,
+                    ),
+                    // Graph2 expects List<SleepDataTrend> for the week
+                    Graph2(
+                      trendData: trendData,
+                      endDate: _selectedDate,
+                    ),
+                  ],
                 ),
-              )).toList(),
-            ),
-          ],
+              ),
+
+              const SizedBox(height: 12),
+
+              // Page indicator dots
+              _buildPageIndicator(),
+            ],
+          ),
         );
       },
     );
-  }
-
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: selectedDate,
-      firstDate: DateTime(2000),
-      lastDate: DateTime.now().subtract(const Duration(days: 1)),
-    );
-    if (picked != null && picked != selectedDate) {
-      setState(() {
-        selectedDate = picked;
-        _fetchDataForSelectedDate(); // Richiama il fetching dei dati per la nuova data
-      });
-    }
   }
 }

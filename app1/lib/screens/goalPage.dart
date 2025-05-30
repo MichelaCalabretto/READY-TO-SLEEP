@@ -52,7 +52,7 @@ class GoalPage extends StatelessWidget {
           'Welcome to Flutter',
           style: TextStyle(
             color: Colors.white,
-            fontSize: 30,
+            fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),

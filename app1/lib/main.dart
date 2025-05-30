@@ -26,8 +26,8 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Trial App1',
         //home: OnboardingPage()
-        //home: HomePage(),
-        home: SplashPage(),
+        home: HomePage(),
+        //home: SplashPage(),
         //home: LoginPage(),
         //home: GoalPage()
         //home: ProfilePage(),

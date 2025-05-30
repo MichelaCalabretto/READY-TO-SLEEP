@@ -97,7 +97,7 @@ class _ProfilePageState extends State<ProfilePage> {
           'Edit Profile',
           style: TextStyle(
             color: Colors.white, 
-            fontSize: 30,
+            fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
