@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:app1/models/user_profile.dart';
 import 'package:app1/models/sleep_data_night.dart';
+import 'package:app1/widgets/meal_entry_dialog.dart';
 
 // Helper to format sleep duration into "X h Y min"
 String _formatSleepDurationHelper(int totalMinutes) {
@@ -170,12 +171,13 @@ class UserGreetingWithAvatar extends StatelessWidget {
                   alignment: Alignment.centerRight, 
                   child: ElevatedButton(
                     onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
+                      /*ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text('Add meal dialog functionality to be implemented.'),
                           backgroundColor: Color.fromARGB(255, 192, 153, 227), 
                         ),
-                      );
+                      );*/
+                      MealEntryDialog.show(context);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: textColor, 
