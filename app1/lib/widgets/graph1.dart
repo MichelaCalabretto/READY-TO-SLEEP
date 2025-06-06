@@ -16,7 +16,7 @@ class Graph1 extends StatefulWidget {
 class _Graph1State extends State<Graph1> {
   final Color darkPurple = const Color.fromARGB(255, 38, 9, 68);
   final Color lilla = const Color.fromARGB(255, 192, 153, 227);
-  final Color barColor = const Color.fromARGB(255, 38, 9, 68); // changed to darkPurple
+  final Color barColor = const Color.fromARGB(255, 38, 9, 68); 
   final Color backgroundWhiteShade = Colors.white70.withOpacity(0.2);
   final double barWidth = 22;
 
@@ -33,7 +33,7 @@ class _Graph1State extends State<Graph1> {
     return '${h}h ${m}m';
   }
 
-  @override
+  /*@override
   void didUpdateWidget(covariant Graph1 oldWidget) {
     super.didUpdateWidget(oldWidget);
     
@@ -43,7 +43,7 @@ class _Graph1State extends State<Graph1> {
         touchedIndex = null; // optional: reset any touched state when data changes
       });
     }
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {

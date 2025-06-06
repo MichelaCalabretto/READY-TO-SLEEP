@@ -1,12 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
 import 'package:app1/screens/loginPage.dart';
 import 'package:app1/screens/profilePage.dart';
 import 'package:app1/screens/diaryPage.dart';
-import 'package:app1/screens/goalPage.dart';
+import 'package:app1/screens/homePage.dart';
+import 'package:app1/models/user_profile.dart';
+import 'package:app1/providers/user_profile_provider.dart';
 
 class MyDrawer extends StatelessWidget {
   const MyDrawer({super.key});
+
+  // Helper to determine greeting text
+  String _getGreeting(UserProfile? profile) {
+    if (profile?.nickname?.isNotEmpty == true) { //"?." = if profile is not null access it
+      return 'Hi, ${profile!.nickname!}';
+    } else if (profile?.name?.isNotEmpty == true) {
+      return 'Hi, ${profile!.name!}';
+    } else {
+      return 'Hi, User';
+    }
+  }
+
+  // Helper to determine avatar path (consistent with HomePage)
+  // For the drawer, we always want neutral verison
+  String _getAvatarPath(UserProfile? profile) {
+    String avatarName = profile?.avatar?.isNotEmpty == true ? profile!.avatar! : 'cat';
+  
+    // Fallback for any error or missing specific avatar
+    //String fallbackAvatarAssetPath = 'assets/images/avatars/cat.png'; 
+
+    // Attempt to create the primary path
+    String primaryAvatarPath = 'images/avatars/${avatarName}.png';
+    
+    // Here we just construct the path. The Image.asset errorBuilder will handle missing assets.
+    return primaryAvatarPath; // The errorBuilder in Image.asset will catch if this doesn't exist
+  }
+
 
   Future<void> _logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
@@ -46,6 +76,15 @@ class MyDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final userProfileProvider = Provider.of<UserProfileProvider>(context); //to get an instancxe of the user_profile_provider
+    final UserProfile? currentUserProfile = userProfileProvider.userProfile(); //gets the current userProfile
+    //final bool isLoadingProfile = userProfileProvider.isLoading();
+
+    String avatarPath = _getAvatarPath(currentUserProfile);
+    String greeting = _getGreeting(currentUserProfile);
+    // Fallback avatar if the dynamic one fails to load
+    String fallbackDrawerAvatar = 'images/avatars/cat.png'; 
+
     return Drawer(
       child: Container(
         decoration: const BoxDecoration(
@@ -84,16 +123,20 @@ class MyDrawer extends StatelessWidget {
                         maxWidth: 120, // the image is bigger than the circle
                         maxHeight: 120,
                         child: Image.asset(
-                          'images/avatars/cat.png',
+                          avatarPath,
                           fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                          // Fallback if the specific avatar is not found
+                          return Image.asset(fallbackDrawerAvatar, fit: BoxFit.cover, width: 120, height: 120);
+                        },
                         ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 20),
-                  const Text(
-                    'Hi, Michi!',
-                    style: TextStyle(
+                  Text(
+                    greeting,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 30,
                       fontWeight: FontWeight.bold,
@@ -130,12 +173,12 @@ class MyDrawer extends StatelessWidget {
                       },
                     ),
                     ListTile(
-                      leading: const Icon(Icons.flag, color: Colors.white),
-                      title: const Text('Goal', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20,)),
+                      leading: const Icon(Icons.home, color: Colors.white),
+                      title: const Text('Home', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20,)),
                       onTap: () {
-                        Navigator.push(
+                        Navigator.pushReplacement(
                           context,
-                          MaterialPageRoute(builder: (context) => GoalPage()),
+                          MaterialPageRoute(builder: (context) => HomePage()),
                         );
                       },
                     ),
@@ -143,7 +186,7 @@ class MyDrawer extends StatelessWidget {
                       leading: const Icon(Icons.menu_book, color: Colors.white),
                       title: const Text('Diary', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20,)),
                       onTap: () {
-                        Navigator.push(
+                        Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(builder: (context) => DiaryPage()),
                         );

@@ -8,12 +8,12 @@ class AvatarDropdown extends StatelessWidget {
 
   // List of available avatar image filenames
   final List<String> avatars = [
-    'owl.png',
-    'dog.png',
-    'cat.png',
-    'tiger.png',
-    'fox.png',
-    'pinguin.png',
+    'owl',
+    'dog',
+    'cat',
+    'tiger',
+    'fox',
+    'pinguin',
   ];
 
   @override
@@ -41,7 +41,7 @@ class AvatarDropdown extends StatelessWidget {
           child: Row(
             children: [
               Image.asset(
-                'images/avatars/$filename',
+                'images/avatars/$filename.png',
                 width: 40,
                 height: 40,
               ),

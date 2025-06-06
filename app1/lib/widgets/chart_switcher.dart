@@ -177,7 +177,7 @@ class _ChartSwitcherState extends State<ChartSwitcher> {
                   children: [
                     // Graph1 expects SleepDataNight? for a single night
                     Graph1(
-                      key: ValueKey(_formatDateForApi(_selectedDate)), // Use a ValueKey based on the selected date string
+                      //key: ValueKey(_formatDateForApi(_selectedDate)), // Use a ValueKey based on the selected date string
                       sleepData: nightData,
                     ),
                     // Graph2 expects List<SleepDataTrend> for the week

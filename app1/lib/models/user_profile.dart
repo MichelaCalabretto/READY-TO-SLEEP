@@ -34,15 +34,44 @@ class UserProfile {
   }
 
   // Save data on SharedPreferences
+  // In lib/models/user_profile.dart
   Future<void> save() async {
     final sp = await SharedPreferences.getInstance();
-    if (name != null) await sp.setString('name', name!);
-    if (surname != null) await sp.setString('surname', surname!);
-    if (nickname != null) await sp.setString('username', nickname!);
-    if (gender != null) await sp.setString('gender', gender!);
-    if (dob != null) await sp.setString('dob', dob!);
-    if (job != null) await sp.setString('job', job!);
-    if (avatar != null) await sp.setString('avatar', avatar!);
+    if (name != null && name!.isNotEmpty) { // Also check for isNotEmpty if empty string means "not set"
+      await sp.setString('name', name!);
+    } else {
+      await sp.remove('name'); // Remove key if name is null or empty
+    }
+    if (surname != null && surname!.isNotEmpty) {
+      await sp.setString('surname', surname!);
+    } else {
+      await sp.remove('surname');
+    }
+    if (nickname != null && nickname!.isNotEmpty) { 
+      await sp.setString('nickname', nickname!);
+    } else {
+      await sp.remove('nickname');
+    }
+    if (gender != null) { // Gender is a fixed list, so null means not selected
+      await sp.setString('gender', gender!);
+    } else {
+      await sp.remove('gender');
+    }
+    if (dob != null && dob!.isNotEmpty) {
+      await sp.setString('dob', dob!);
+    } else {
+      await sp.remove('dob');
+    }
+    if (job != null) { // Job is a fixed list, so null means not selected
+      await sp.setString('job', job!);
+    } else {
+      await sp.remove('job');
+    }
+    if (avatar != null) { 
+      await sp.setString('avatar', avatar!);
+    } else {
+      await sp.remove('avatar'); 
+    }
     await sp.setBool('onboarding_completed', true);
   }
 }

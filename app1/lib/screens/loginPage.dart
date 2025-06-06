@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:app1/screens/goalPage.dart';
 import 'package:app1/screens/onboardingPage.dart';
 import 'package:app1/utils/impact.dart';
 import 'package:shared_preferences/shared_preferences.dart';

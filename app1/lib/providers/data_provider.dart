@@ -2,11 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:app1/models/sleep_data_trend.dart';
 import 'package:app1/models/sleep_data_night.dart';
 import 'package:app1/utils/impact.dart';
+import 'package:intl/intl.dart';
 
 class SleepDataProvider extends ChangeNotifier {
 
   List<SleepDataTrend> sleepTrendData = []; // List of sleep trends (for multiple days)
-  SleepDataNight? sleepNightData; // Single night data
+  SleepDataNight? sleepNightData; // Single night data, for chart_switcher
+  
+  SleepDataNight? _yesterdaysSleepDetail; // New properties for yesterday's specific sleep data
+  SleepDataNight? get yesterdaysSleepDetail => _yesterdaysSleepDetail;
+
+  bool _isLoadingYesterdaysSleep = false;
+  bool get isLoadingYesterdaysSleep => _isLoadingYesterdaysSleep;
+
+  // Flag to ensure we attempt to fetch yesterday's data only once per relevant period
+  // or if the "yesterday" date changes (e.g. app open over midnight)
+  String? _lastFetchedYesterdayDate;
 
   /// Fetch sleep trend data for a date range (e.g., a week or month)
   Future<void> fetchSleepTrendData(String startDate, String endDate) async {
@@ -57,10 +68,42 @@ class SleepDataProvider extends ChangeNotifier {
     notifyListeners(); // Always notify listeners on data fetch attempt
   }
 
+  /// Ensures that sleep data for the actual "yesterday" is fetched and available.
+  Future<void> ensureYesterdaysSleepDataFetched() async {
+    final String yesterdayDateString =
+        DateFormat('yyyy-MM-dd').format(DateTime.now().subtract(const Duration(days: 1)));
+
+    // If already loading for the current "yesterday", or if data for current "yesterday" is already loaded, do nothing.
+    if (_isLoadingYesterdaysSleep && _lastFetchedYesterdayDate == yesterdayDateString) return; //checks if it's already loading data and if the last fetch was already for yesterday ---> if it's already fetching data, don't start another fetch
+    if (_yesterdaysSleepDetail != null && _lastFetchedYesterdayDate == yesterdayDateString && _yesterdaysSleepDetail!.time == yesterdayDateString) { //if we already have data, and it is for the correct date, and the stored data actually matched the yesterday's date
+        return;
+    }
+
+    _isLoadingYesterdaysSleep = true;
+    _lastFetchedYesterdayDate = yesterdayDateString; // Mark the date we are fetching for
+    notifyListeners();
+
+    final data = await Impact.fetchSleepNightData(yesterdayDateString);
+
+    if (data != null &&
+        data['data'] is Map &&
+        data['data']['data'] != null) {
+      final sleepJson = data['data']['data'];
+      final parsed = SleepDataNight.fromApiData(yesterdayDateString, sleepJson);
+      _yesterdaysSleepDetail = parsed; // Can be null if parsing failed
+    } else {
+      _yesterdaysSleepDetail = null; // Fetching failed or no data
+    }
+
+    _isLoadingYesterdaysSleep = false;
+    notifyListeners();
+  }
+
   /// Clears both trend and night data
   void clearSleepData() {
     sleepTrendData.clear();
     sleepNightData = null;
     notifyListeners();
   }
+
 }
