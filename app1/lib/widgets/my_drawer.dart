@@ -172,7 +172,7 @@ class MyDrawer extends StatelessWidget {
                         );
                       },
                     ),
-                    ListTile(
+                    /*ListTile(
                       leading: const Icon(Icons.home, color: Colors.white),
                       title: const Text('Home', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20,)),
                       onTap: () {
@@ -191,7 +191,7 @@ class MyDrawer extends StatelessWidget {
                           MaterialPageRoute(builder: (context) => DiaryPage()),
                         );
                       },
-                    ),
+                    ),*/
                   ],
                 ),
               ),

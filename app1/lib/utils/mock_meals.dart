@@ -1,23 +1,53 @@
 import 'package:app1/models/meal_data.dart';
 import 'package:app1/providers/data_provider.dart';
 import 'package:intl/intl.dart';
-
+import 'dart:math'; 
 
 /// Generates 30 mock MealData entries for the past 30 days.
 /// If available, sleep duration from individual night data is matched and attached.
 Future<List<MealData>> generateMockMeals(SleepDataProvider sleepProvider) async {
   final List<MealData> mockMeals = [];
   final now = DateTime.now();
+  
+   final random = Random();
 
   // Loop through the last 30 days
   for (int i = 0; i < 30; i++) {
     final dateForMeal = now.subtract(Duration(days: i + 1));
     final formattedDateForMeal = DateFormat('yyyy-MM-dd').format(dateForMeal);
 
-    // Generate simple mock macros that vary a little day to day
-    final carbs = 100 + (i % 50);
-    final fats = 50 + (i % 20);
-    final proteins = 60 + (i % 30);
+    // Generate mock meals that vary everyday
+     late int carbs, fats, proteins;
+
+    // Randomly pick a meal archetype for the day to simulate different eating patterns
+    int mealType = random.nextInt(4); // Generates a number from 0 to 3
+
+    switch (mealType) {
+      case 0:
+        // Archetype 0: Balanced Meal
+        carbs = 100 + random.nextInt(51); // 100-150g
+        fats = 40 + random.nextInt(31);  // 40-70g
+        proteins = 50 + random.nextInt(31); // 50-80g
+        break;
+      case 1:
+        // Archetype 1: High-Carb, Low-Fat Meal (e.g., Pasta Night)
+        carbs = 180 + random.nextInt(71); // 180-250g
+        fats = 20 + random.nextInt(21);   // 20-40g
+        proteins = 40 + random.nextInt(21);  // 40-60g
+        break;
+      case 2:
+        // Archetype 2: High-Fat, Low-Carb Meal (e.g., Keto-style)
+        carbs = 20 + random.nextInt(31);  // 20-50g
+        fats = 70 + random.nextInt(41);   // 70-110g
+        proteins = 60 + random.nextInt(31);  // 60-90g
+        break;
+      case 3:
+        // Archetype 3: High-Protein Meal (e.g., Post-Workout)
+        carbs = 80 + random.nextInt(51);  // 80-130g
+        fats = 30 + random.nextInt(21);   // 30-50g
+        proteins = 80 + random.nextInt(41);  // 80-120g
+        break;
+    }
 
     double? sleepHoursForThisMeal;
 

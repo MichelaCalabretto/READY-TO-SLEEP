@@ -16,6 +16,7 @@ class DiaryPage extends StatelessWidget {
   final Color darkPurple = const Color.fromARGB(255, 38, 9, 68);
   final Color lilla = const Color.fromARGB(255, 192, 153, 227);
   final Color whiteStrong = Colors.white;
+  final Color snackbarColor = const Color.fromARGB(255, 255, 137, 255);
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +103,7 @@ class DiaryPage extends StatelessWidget {
                         // loadMockMealHistory will clear existing and add these
                         mealDataProvider.loadMockMealHistory(mockMeals); 
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Diary populated successfully!', style: TextStyle(color: whiteStrong)), backgroundColor: Colors.green),
+                          SnackBar(content: Text('Diary populated successfully!', style: TextStyle(color: whiteStrong)), backgroundColor: snackbarColor),
                         );
                       } catch (e) {
                          ScaffoldMessenger.of(context).showSnackBar(
@@ -149,50 +150,3 @@ class DiaryPage extends StatelessWidget {
 
 
 
-
-/*import 'package:flutter/material.dart';
-import 'package:app1/widgets/my_drawer.dart';
-
-class DiaryPage extends StatelessWidget {
-  DiaryPage({Key? key}) : super(key: key);
-  
-  @override
-  Widget build(BuildContext context){
-    return Scaffold(
-      extendBodyBehindAppBar: true, // extend background behind app bar
-      appBar: AppBar(
-        title: const Text(
-          'Welcome to Flutter',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: Colors.transparent, // transparent app bar
-        elevation: 0,
-        foregroundColor: Colors.white, // white text color matching profilePage
-      ),
-      drawer: const MyDrawer(),
-      body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/images/welcomePage_wallpaper.png'), 
-            fit: BoxFit.cover,
-          ),
-        ),
-        child: const Center(
-          child: Text(
-            'diaryPage',
-            style: TextStyle(
-              color: Colors.white, 
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ),
-    );
-  } // build
-}
-*/

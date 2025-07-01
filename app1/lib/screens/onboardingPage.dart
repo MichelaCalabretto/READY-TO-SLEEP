@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:app1/screens/homePage.dart';
+import 'package:app1/screens/mainScreen.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:app1/widgets/avatar_dropdown.dart';
@@ -105,7 +106,8 @@ class _OnboardingState extends State<OnboardingPage> {
 
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => HomePage()),
+      MaterialPageRoute(builder: (context) => MainScreen()),
+      //MaterialPageRoute(builder: (context) => HomePage()),
     );
   }
 
@@ -292,7 +294,8 @@ class _OnboardingState extends State<OnboardingPage> {
                                           await _setOnboardingCompleted();
                                           Navigator.pushReplacement(
                                             context,
-                                            MaterialPageRoute(builder: (context) => HomePage()),
+                                            MaterialPageRoute(builder: (context) => MainScreen()),
+                                            //MaterialPageRoute(builder: (context) => HomePage()),
                                           );
                                         },
                                         child: Text(

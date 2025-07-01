@@ -78,9 +78,6 @@ class _MealEntryDialogState extends State<MealEntryDialog> {
       }
     }
 
-    // Close the current input dialog
-    Navigator.of(context).pop();
-
     // Show the confirmation dialog with the feedback message
     final bool? confirmed = await showDialog<bool>( //function that displays the dialog
       context: context,
@@ -105,6 +102,7 @@ class _MealEntryDialogState extends State<MealEntryDialog> {
 
     // Save the data if confirmed, otherwise re-show the input dialog
     if (confirmed == true) {
+      Navigator.of(context).pop(); 
       _saveMeal(mealProvider, carbs, fats, proteins);
     } else {
       // If user cancels, show the initial dialog again with the entered values
