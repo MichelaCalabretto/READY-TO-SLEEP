@@ -19,6 +19,7 @@ class MealDataProvider extends ChangeNotifier {
     required int carbs,
     required int fats,
     required int proteins,
+    required String mealType,
   }) {
     final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
@@ -31,6 +32,7 @@ class MealDataProvider extends ChangeNotifier {
       _meals[existingIndex].carbs = carbs;
       _meals[existingIndex].fats = fats;
       _meals[existingIndex].proteins = proteins;
+      _meals[existingIndex].mealType = mealType;
     } else {
       // Else, create and add new meal
       _meals.add(MealData(
@@ -38,6 +40,7 @@ class MealDataProvider extends ChangeNotifier {
         carbs: carbs,
         fats: fats,
         proteins: proteins,
+        mealType: mealType,
       ));
     }
 

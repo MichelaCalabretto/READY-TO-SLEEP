@@ -6,6 +6,7 @@ class MealData {
   int carbs;
   int fats;
   int proteins;
+  String mealType;
 
   /// Number of sleep hours recorded the night after the meal (null if not yet available)
   double? sleepHours;
@@ -15,6 +16,7 @@ class MealData {
     required this.carbs,
     required this.fats,
     required this.proteins,
+    required this.mealType,
     this.sleepHours, //sleepHours is optional, since it will be aviable only after the night passes
   });
 
@@ -29,6 +31,7 @@ class MealData {
         'carbs': carbs,
         'fats': fats,
         'proteins': proteins,
+        'mealType': mealType,
         'sleepHours': sleepHours,
       };
 
@@ -38,12 +41,13 @@ class MealData {
         carbs: map['carbs'],
         fats: map['fats'],
         proteins: map['proteins'],
+        mealType: map['mealType'] ?? 'unknown',
         sleepHours: map['sleepHours']?.toDouble(),
       );
 
   @override
   String toString() {
     return 'MealData(date: $date, carbs: $carbs g, fats: $fats g, proteins: $proteins g, '
-        'sleepHours: ${sleepHours?.toStringAsFixed(1) ?? "Not yet recorded"})';
+        'mealType: $mealType, sleepHours: ${sleepHours?.toStringAsFixed(1) ?? "Not yet recorded"})';
   }
 }

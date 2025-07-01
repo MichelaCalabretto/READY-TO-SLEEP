@@ -32,7 +32,7 @@ class CustomNavBar extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
           decoration: BoxDecoration(
             // The color is semi-transparent to blend with the background wallpaper.
-            color: darkPurple.withOpacity(0.95),
+            color: darkPurple.withOpacity(0.65),
             // A large borderRadius creates the pill or stadium shape.
             borderRadius: BorderRadius.circular(30.0),
             // The boxShadow adds depth, making the bar lift off the page.
@@ -58,16 +58,16 @@ class CustomNavBar extends StatelessWidget {
                 isSelected: currentIndex == 0,
                 // Pass the tap handler which will call the parent's callback with index 0.
                 onTap: () => onTap(0),
-                selectedColor: Colors.white,
-                unselectedColor: lilla,
+                selectedColor: lilla,
+                unselectedColor: Colors.white70,
               ),
               _NavBarItem(
                 icon: Icons.menu_book_rounded,
                 label: 'Diary',
                 isSelected: currentIndex == 1,
                 onTap: () => onTap(1),
-                selectedColor: Colors.white,
-                unselectedColor: lilla,
+                selectedColor: lilla,
+                unselectedColor: Colors.white70,
               ),
             ],
           ),

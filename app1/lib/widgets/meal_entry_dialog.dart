@@ -124,9 +124,34 @@ class _MealEntryDialogState extends State<MealEntryDialog> {
     return carbMatch && fatMatch && proteinMatch;
   }
 
+  // Function to classify the meal type
+  String _classifyMealType(int carbs, int fats, int proteins) {
+    final double totalCarbCalories = carbs * 4.0;
+    final double totalFatCalories = fats * 9.0;
+    final double totalProteinCalories = proteins * 4.0;
+    final double totalCalories = totalCarbCalories + totalFatCalories + totalProteinCalories;
+
+    if (totalCalories == 0) return 'unknown';
+
+    final double carbPercentage = totalCarbCalories / totalCalories;
+    final double fatPercentage = totalFatCalories / totalCalories;
+    final double proteinPercentage = totalProteinCalories / totalCalories;
+
+    if (carbPercentage > 0.50) {
+      return 'highCarb';
+    } else if (fatPercentage > 0.45) {
+      return 'highFat';
+    } else if (proteinPercentage > 0.35) {
+      return 'highProtein';
+    } else {
+      return 'balanced';
+    }
+  }
+
   /// Saves the meal using the provider
   void _saveMeal(MealDataProvider provider, int carbs, int fats, int proteins) {
-    provider.addOrUpdateMeal(carbs: carbs, fats: fats, proteins: proteins); 
+    final mealType = _classifyMealType(carbs, fats, proteins);
+    provider.addOrUpdateMeal(carbs: carbs, fats: fats, proteins: proteins, mealType: mealType,); 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Text("Tonight's meal has been saved to your diary!"),
