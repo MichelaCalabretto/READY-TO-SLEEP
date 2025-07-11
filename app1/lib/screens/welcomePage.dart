@@ -67,7 +67,7 @@ class WelcomePage extends StatelessWidget {
                       SizedBox(height: 40),
 
                       // Message to the user
-                      Text('We hope that this app will help you recognize how essential sleep is, because sleeping well today means living better tomorrow.', 
+                      Text("Eat smarter, sleep better. See how tonight's dinner can transform tomorrow's rest and unlock a new level of wellbeing.", 
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Colors.white,
