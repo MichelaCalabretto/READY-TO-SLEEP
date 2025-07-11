@@ -103,7 +103,10 @@ class _ChartSwitcherState extends State<ChartSwitcher> {
       setState(() {
         _selectedDate = picked;
       });
-      _fetchDataForDate(picked);
+      // Delaye the UI rebuild until the animation is completed
+      Future.delayed(Duration.zero, () {
+        _fetchDataForDate(picked);
+      });
     }
   }
 

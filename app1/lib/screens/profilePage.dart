@@ -53,34 +53,41 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   // Method that validates the form and then saves its content
+
   Future<void> _saveProfile() async {
     if (!_formKey.currentState!.validate()) return; // first validate the form 
 
-    final userProfileProvider = Provider.of<UserProfileProvider>(context, listen: false); // retrieves the UserProfileProvider instance from the widget tree
-                                                                                          // listen: false ---> we don’t want to rebuild the UI if the provider changes, we just need to call the saveProfile() method ---> "read only"
+    // Delaye the UI rebuild until the animation is completed
+    Future.delayed(Duration.zero, () async {
+      final userProfileProvider = Provider.of<UserProfileProvider>(context, listen: false); // retrieves the UserProfileProvider instance from the widget tree
+                                                                                            // listen: false ---> we don’t want to rebuild the UI if the provider changes, we just need to call the saveProfile() method ---> "read only"
 
-    final updatedProfile = UserProfile(
-      name: _nameController.text.trim().isEmpty ? null : _nameController.text.trim(),
-      surname: _surnameController.text.trim().isEmpty ? null : _surnameController.text.trim(),
-      nickname: _nicknameController.text.trim().isEmpty ? null : _nicknameController.text.trim(),
-      dob: _dobController.text.trim().isEmpty ? null : _dobController.text.trim(),
-      gender: _gender,
-      job: _job,
-      avatar: _avatar,
-    );
+      final updatedProfile = UserProfile(
+        name: _nameController.text.trim().isEmpty ? null : _nameController.text.trim(),
+        surname: _surnameController.text.trim().isEmpty ? null : _surnameController.text.trim(),
+        nickname: _nicknameController.text.trim().isEmpty ? null : _nicknameController.text.trim(),
+        dob: _dobController.text.trim().isEmpty ? null : _dobController.text.trim(),
+        gender: _gender,
+        job: _job,
+        avatar: _avatar,
+      );
 
-    // Use the provider to save the profile
-    // This will handle the actual saving and notify listeners 
-    await userProfileProvider.saveProfile(updatedProfile);
+      // Use the provider to save the profile
+      // This will handle the actual saving and notify listeners 
+      await userProfileProvider.saveProfile(updatedProfile);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        backgroundColor: Color.fromARGB(255, 192, 153, 227),
-        behavior: SnackBarBehavior.floating,
-        margin: EdgeInsets.all(8),
-        duration: Duration(seconds: 2),
-        content: Text('Profile updated successfully!')),
-    );
+      // Check if the widget is still mounted before showing the SnackBar
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Color.fromARGB(255, 192, 153, 227),
+            behavior: SnackBarBehavior.floating,
+            margin: EdgeInsets.all(8),
+            duration: Duration(seconds: 2),
+            content: Text('Profile updated successfully!')),
+        );
+      }
+    });
   }
 
   // Method to let the user pick a date of birth using the date picker dialog
@@ -121,9 +128,7 @@ class _ProfilePageState extends State<ProfilePage> {
           // Use WidgetsBinding to schedule this after the current build cycle, which is safer if _initializeFormData were to call setState or affect layout
           WidgetsBinding.instance.addPostFrameCallback((_) { // ensures first the UI was built, and only then the form can be initialized
             if(mounted) { // ensure widget is still mounted before initializing
-              setState((){
-                _initializeFormData(currentUserProfile);
-              });      
+                _initializeFormData(currentUserProfile);      
             }
           });
         }

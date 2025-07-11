@@ -85,7 +85,12 @@ class UserGreetingWithAvatar extends StatelessWidget {
     // Define the visual size of the avatar (the circular crop area)
     const double avatarDisplaySize = 120.0; 
     // Define the actual size of the image asset to be loaded (larger for zoom effect)
-    const double avatarImageSourceSize = 250.0; // this is larger than avatarDisplaySize for zoom
+    double avatarImageSourceSize; // this is larger than avatarDisplaySize for zoom
+    if (avatarBaseName == 'fox') {
+      avatarImageSourceSize = 210.0; // use a smaller source size for the fox
+    } else {
+      avatarImageSourceSize = 250.0; // use the default larger size for all other avatars
+    } 
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center, // vertically align avatar and bubble at the center
