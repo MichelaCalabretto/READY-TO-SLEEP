@@ -1,7 +1,5 @@
-import 'package:intl/intl.dart';
-
 class SleepDataNight {
-  final String time; /// the date of the night in yyyy-MM-dd format (from the button in the home page).
+  final String time; // the date of the night in yyyy-MM-dd format (from the button in the home page)
   final int duration;
   final int minutesToFallAsleep;
   final int minutesAwake;
@@ -19,32 +17,40 @@ class SleepDataNight {
     required this.minutesLight,
   });
 
-  /// Factory method that safely parses inconsistent 'data' formats (ometimes 'data' ia a Map, sometimes a List of Maps, sometimes it's empty or malformed)
-  /// factory constructor can return a new instance of a class, and can include logic or conditions before deciding what to return; it also doesn't need to create a new object every time
+  // A static parsing utility that creates a SleepDataNight object from raw API data
+  // It safely handles various response formats (List, Map, or null) before passing the data to the .fromJson constructor
+  // The input fullDate is necessary to correctly handle the full date as yyyy-MM-dd (in the response the format is different)
+  // The fullDate will then be passed to the fromJson to assign the correct date to the SleepDataNight object, along with the other parameters
   static SleepDataNight? fromApiData(String fullDate, dynamic data) {
+    // First case: the response is null
     if (data == null) return null;
 
-    if (data is List && data.isNotEmpty && data.first is Map<String, dynamic>) { //data is a List
-                                                                                 //data.first is Map<...> ensures that the first element is a valid Map
+    // Second case (most common format): the response format is List with inside a Map (as described in the API documentation)
+    if (data is List && data.isNotEmpty && data.first is Map<String, dynamic>) { // data is a List
+                                                                                 // data.first is Map<...> ensures that the first element is a valid Map 
       return SleepDataNight.fromJson(fullDate, data.first);
     }
 
-    if (data is Map<String, dynamic>) { //data is already a single Map, and not inside a List
+    // Third case (less common format): the response format is a Map ---> examples: 29/04/2025 and 02/05/2025
+    if (data is Map<String, dynamic>) { 
       return SleepDataNight.fromJson(fullDate, data);
     }
 
+    // In all other cases return null
     return null;
   }
 
-  /// Constructor to create a SleepDataNight object from JSON-like data
-  /// - [fullDate] is the full date string for the night in yyyy-MM-dd format
-  /// - [json] is the sleep record map from the API
+  // Named constructor to create a SleepDataNight object from JSON-like data
+  // [fullDate] is the full date string for the night in yyyy-MM-dd format
+  // [json] is the sleep record map from the API (the fromJson will handle only Map formats, the variaty of the response is handled in the fromApiData)
   SleepDataNight.fromJson(String fullDate, Map<String, dynamic> json)
-    : time = fullDate, // Directly assign the provided date
-      duration = (json['duration'] ?? 0) ~/ 60000, // Convert duration from ms to minutes (~/ = integer division)
-      minutesToFallAsleep = json['minutesToFallAsleep'] ?? 0, // Use 0 if the value is missing
+    // Initializer list ---> list of assignements to run before the main body of the constructor (in this case there is no body)
+    : time = fullDate, // directly assign the provided date
+      duration = (json['duration'] ?? 0) ~/ 60000, // convert duration from ms to minutes (~/ = integer division)
+                                                   // check if the value is null through ?? and returns 0 if it is, then the division by 60000 is performed
+      minutesToFallAsleep = json['minutesToFallAsleep'] ?? 0, // use 0 if the value is missing
       minutesAwake = json['minutesAwake'] ?? 0, 
-      minutesRem = json['levels']?['summary']?['rem']?['minutes'] ?? 0, // Safe access: if 'rem' or 'minutes' is missing, fallback to 0
+      minutesRem = json['levels']?['summary']?['rem']?['minutes'] ?? 0, // safe access: if 'rem' or 'minutes' is missing, fallback to 0
       minutesDeep = json['levels']?['summary']?['deep']?['minutes'] ?? 0, 
       minutesLight = json['levels']?['summary']?['light']?['minutes'] ?? 0; 
 

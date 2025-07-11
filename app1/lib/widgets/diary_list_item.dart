@@ -5,7 +5,7 @@ import 'package:app1/models/meal_data.dart';
 class DiaryListItem extends StatelessWidget {
   final MealData meal;
 
-  // Theme colors (consistent with Graph1/Graph2 and ChartSwitcher)
+  // Theme colors 
   final Color darkPurple = const Color.fromARGB(255, 38, 9, 68);
   final Color lilla = const Color.fromARGB(255, 192, 153, 227);
   final Color lightLilla = const Color.fromARGB(255, 243, 209, 255);
@@ -14,26 +14,21 @@ class DiaryListItem extends StatelessWidget {
 
   const DiaryListItem({Key? key, required this.meal}) : super(key: key);
 
-  // Helper to format date for display (e.g., "June 3, 2025")
+  // Helper to format date for display (i.e., "June 3, 2025")
   String _formatDisplayDate(String dateStr) {
-    try {
-      final DateTime date = DateTime.parse(dateStr);
-      return DateFormat('MMMM d, yyyy').format(date);
-    } catch (e) {
-      return dateStr; // Fallback to original string if parsing fails
-    }
+    final DateTime date = DateTime.parse(dateStr);
+    return DateFormat('MMMM d, yyyy').format(date);
   }
 
   // Helper method to format sleep duration into "X hours Y minutes"
   String _formatSleepDuration(double totalHours) {
-    // Ensure totalHours is positive, though MealData should ideally not store negative sleep.
-    // generateMockMeals sets sleepHours to null if duration was 0, so this will be called for positive values.
+    // Ensure totalHours is positive, though MealData shouldn't be storing negative sleep
     if (totalHours < 0) totalHours = 0;
 
-    final int hours = totalHours.floor(); // Get the whole number of hours
-    final int minutes = ((totalHours - hours) * 60).round(); // Convert the fractional part to minutes and round
+    final int hours = totalHours.floor(); // get the whole number of hours 
+    final int minutes = ((totalHours - hours) * 60).round(); // convert the fractional part to minutes and round
 
-    return '${hours} h ${minutes} min';
+    return '$hours h $minutes min';
   }
 
 
@@ -53,7 +48,7 @@ class DiaryListItem extends StatelessWidget {
     }
   }
 
-  // This widget now gets the display name from the helper function
+  // This widget gets the display name from the helper function
   Widget _buildMealTypeTag(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
@@ -62,7 +57,8 @@ class DiaryListItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(12.0),
       ),
       child: Text(
-        _getDisplayMealTypeName(meal.mealType), // use the helper function 
+        _getDisplayMealTypeName(meal.mealType), // use the helper function for the text to display
+                                                // accesses the mealType through the meal object defined at the top of the class
         style: TextStyle(
           color: darkPurple,
           fontWeight: FontWeight.bold,
@@ -74,27 +70,24 @@ class DiaryListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The Card is the main container for each diary entry, giving it a
-    // defined shape, elevation, and a semi-transparent background.
-    return Card(
+    // The Card is the main container for each diary entry, giving it a defined shape, elevation, and a semi-transparent background
+    return Card( // widget that gives a material design-style container that is great for separating content visually
       elevation: 2,
       margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
       color: Colors.white.withOpacity(0.15),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
       child: Padding(
-        // Padding provides spacing between the card's border and its content
+        // Padding for space between the card's border and its content
         padding: const EdgeInsets.all(16.0),
-        // A Column arranges the content vertically
+        // Column to arrange the content vertically
         child: Column(
-          // Aligns content to the start (left) of the column
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
+          crossAxisAlignment: CrossAxisAlignment.start, // aligns the content to the start of the column
+          children: [
+
             // The first Row holds the date and the meal type tag
             Row(
-              // This pushes the date to the left and the tag to the right
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween, // to pushe the date to the left and the tag to the right
               children: [
-                // Displays the formatted date of the meal
                 Text(
                   _formatDisplayDate(meal.date),
                   style: TextStyle(
@@ -104,20 +97,22 @@ class DiaryListItem extends StatelessWidget {
                   ),
                 ),
                 // This calls the helper widget to build and display the meal type tag
-                _buildMealTypeTag(context),
+                _buildMealTypeTag(context), // this is the second child
               ],
             ),
-            // A SizedBox adds vertical spacing
             const SizedBox(height: 12),
-            // Each of these calls a helper method to create a consistent row for each macronutrient
+
+            // Use the helper method to create a consistent row for each macronutrient
             _buildMacroRow('Carbs:', '${meal.carbs} g', Icons.bakery_dining_outlined),
             _buildMacroRow('Fats:', '${meal.fats} g', Icons.oil_barrel_outlined),
             _buildMacroRow('Proteins:', '${meal.proteins} g', Icons.set_meal_outlined),
             const SizedBox(height: 10),
-            // A visual separator for different sections of the card.
+
+            // Visual separator for to separate the macronutrients from the sleep
             Divider(color: whiteShade.withOpacity(0.5)),
             const SizedBox(height: 10),
-            // The final Row displays the sleep data associated with the meal
+
+            // Final Row with the sleep data associated to the meal
             Row(
               children: [
                 Icon(Icons.king_bed_outlined, color: lilla, size: 20),
@@ -127,10 +122,10 @@ class DiaryListItem extends StatelessWidget {
                   style: TextStyle(
                       color: lilla, fontWeight: FontWeight.bold, fontSize: 16),
                 ),
-                Expanded(
+                Expanded( // takes all the possible space
                   child: Text(
                     // Checks if sleep data is available and formats it, otherwise shows 'Not recorded'
-                    meal.isSleepDataAvailable()
+                    meal.isSleepDataAvailable() // method defined in the meal_data file
                         ? _formatSleepDuration(meal.sleepHours!)
                         : 'Not recorded',
                     style: TextStyle(color: whiteStrong, fontSize: 16),
@@ -148,7 +143,7 @@ class DiaryListItem extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
-        children: <Widget>[
+        children: [
           Icon(icon, color: whiteShade, size: 18),
           const SizedBox(width: 8),
           Text(

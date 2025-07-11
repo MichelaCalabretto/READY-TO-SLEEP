@@ -1,102 +1,99 @@
 import 'package:app1/models/meal_data.dart';
 import 'package:app1/providers/data_provider.dart';
 import 'package:intl/intl.dart';
-import 'dart:math'; 
+import 'dart:math'; // for the random generator
 
-/// Generates 30 mock MealData entries for the past 30 days.
-/// If available, sleep duration from individual night data is matched and attached.
-Future<List<MealData>> generateMockMeals(SleepDataProvider sleepProvider) async {
+// Generates a List of MealData objects that will be the 30 mock MealData entries for the past 30 days
+// If available, sleep duration from individual night data is matched and attached
+Future<List<MealData>> generateMockMeals(SleepDataProvider sleepProvider) async { // the SleepDataProvider is a required input to be able to fetch the sleepData of the night and link it to the meal
   final List<MealData> mockMeals = [];
-  final now = DateTime.now();
+  final now = DateTime.now(); 
   
-   final random = Random();
+  final random = Random(); 
 
   // Loop through the last 30 days
   for (int i = 0; i < 30; i++) {
-    final dateForMeal = now.subtract(Duration(days: i + 1));
+    final dateForMeal = now.subtract(Duration(days: i + 1)); // the last mock meal will be associated to yesterday, the first mock meal to 30 days ago
     final formattedDateForMeal = DateFormat('yyyy-MM-dd').format(dateForMeal);
 
     // Generate mock meals that vary everyday
-    late int carbs, fats, proteins;
+    late int carbs, fats, proteins; // late ---> the value will be assigned to the variable later on, but for sure before the variable is going to be used
     late String mealTypeString;
 
     // Randomly pick a meal archetype for the day to simulate different eating patterns
-    int mealType = random.nextInt(4); // Generates a number from 0 to 3
+    int mealType = random.nextInt(4); // generates a number from 0 to 3
 
-    switch (mealType) {
+    // The meal macronutrients intake was calculated on some base assumptions: 
+    // - we hypotized a total daily intake of 2500 kcal 
+    // - we considered the dinner to be about the 35% of the total daily intake ---> 875 kcal
+    // - we then considered a balanced meal, based on the guidelines, to be: 55% carbs, 30% fats, 15% proteins
+    // - a meal was considered high-carb if 70% of the intake was from carbs (then 15% form fats and 15% from proteins)
+    // - a meal was considered high-fat if 45% of the intake was from fats (then 40% from carbs and 15% from proteins)
+    // - a meal was considered high-protein if 35% of the intake was from proteins (then 45% from carbs and 20% from fats)
+    // The translation from kcal to g was made based on the Atwater System: 1g of carbs = 4 kcal, 1g of proteins = 4 kcal, 1g of fats = 9kcal
+    switch (mealType) { // checks the value of mealType and executes the code for the matching case
       case 0:
-        // Archetype 0: Balanced Meal
+        // Archetype 0: Balanced Meal (Carbs ~120g, Fats ~29g, Proteins ~33g)
         mealTypeString = 'balanced';
-        carbs = 100 + random.nextInt(51); // 100-150g
-        fats = 40 + random.nextInt(31);  // 40-70g
-        proteins = 50 + random.nextInt(31); // 50-80g
+        carbs = 110 + random.nextInt(21); // 110-130g
+        fats = 25 + random.nextInt(9);    // 25-33g
+        proteins = 30 + random.nextInt(7);  // 30-36g
         break;
       case 1:
-        // Archetype 1: High-Carb, Low-Fat Meal (e.g., Pasta Night)
+        // Archetype 1: High-Carb Meal (Carbs ~153g, Fats ~15g, Proteins ~33g)
         mealTypeString = 'highCarb';
-        carbs = 180 + random.nextInt(71); // 180-250g
-        fats = 20 + random.nextInt(21);   // 20-40g
-        proteins = 40 + random.nextInt(21);  // 40-60g
+        carbs = 145 + random.nextInt(17); // 145-161g
+        fats = 12 + random.nextInt(7);    // 12-18g
+        proteins = 30 + random.nextInt(7);  // 30-36g
         break;
       case 2:
-        // Archetype 2: High-Fat, Low-Carb Meal (e.g., Keto-style)
+        // Archetype 2: High-Fat Meal (Carbs ~88g, Fats ~44g, Proteins ~33g)
         mealTypeString = 'highFat';
-        carbs = 20 + random.nextInt(31);  // 20-50g
-        fats = 70 + random.nextInt(41);   // 70-110g
-        proteins = 60 + random.nextInt(31);  // 60-90g
+        carbs = 80 + random.nextInt(17); // 80-96g
+        fats = 40 + random.nextInt(9);   // 40-48g
+        proteins = 30 + random.nextInt(7); // 30-36g
         break;
       case 3:
-        // Archetype 3: High-Protein Meal (e.g., Post-Workout)
+        // Archetype 3: High-Protein Meal (>35% protein calories)
+        // (Carbs ~96g, Fats ~19g, Proteins ~79g)
         mealTypeString = 'highProtein';
-        carbs = 80 + random.nextInt(51);  // 80-130g
-        fats = 30 + random.nextInt(21);   // 30-50g
-        proteins = 80 + random.nextInt(41);  // 80-120g
+        carbs = 90 + random.nextInt(13);  // 90-102g
+        fats = 16 + random.nextInt(7);    // 16-22g
+        proteins = 75 + random.nextInt(9);  // 75-83g
         break;
     }
 
-    double? sleepHoursForThisMeal;
+    double? sleepHoursForThisMeal; // ? because there could be no sleep data for that night (it is initialized as null and will be assigned a value after fetching the data, if there's data)
 
     try {
-      // Fetch sleep data for the specific night corresponding to the meal date.
-      // The Impact API's /sleep/.../day/{date}/ endpoint returns data for the sleep *ending* on the morning of {date}.
-      // However, your MealData stores sleepHours for the night *after* the meal.
-      // If meal.date is '2025-06-03', sleepHours is for the night of June 3rd to June 4th.
-      // The sleep data for the night of 'formattedDateForMeal' (e.g., June 3rd)
-      // would typically be available from an API endpoint queried with 'formattedDateForMeal'
-      // or the next day 'June 4th' depending on how the API attributes the sleep session.
-
-      // Let's assume your `fetchSleepNightData(dayString)` fetches sleep data for the night *starting* on `dayString`.
-      // Your `SleepDataProvider.fetchSleepNightData(day)` updates `sleepProvider.sleepNightData`.
+      // Fetch sleep data for the specific night corresponding to the meal date
       await sleepProvider.fetchSleepNightData(formattedDateForMeal);
-
-      // Check if the fetched data corresponds to the requested date and has a valid duration.
-      // sleepProvider.sleepNightData will be null if the fetch failed or no data was returned.
-      if (sleepProvider.sleepNightData != null && sleepProvider.sleepNightData!.time == formattedDateForMeal) {
-        // Convert duration from minutes (as in SleepDataNight) to hours.
-        // A duration of 0 from the API might mean no sleep was recorded or a very short sleep.
-        // We'll treat 0 minutes as "Not yet recorded" for clarity in the diary.
-        if (sleepProvider.sleepNightData!.duration > 0) {
-          sleepHoursForThisMeal = sleepProvider.sleepNightData!.duration / 60.0;
+      // Check if the fetched data corresponds to the requested date and has a valid duration
+      // sleepProvider.sleepNightData will be null if the fetch failed or no data was returned
+      if (sleepProvider.sleepNightData != null && sleepProvider.sleepNightData!.time == formattedDateForMeal) { // the check on the time is essential for when there is no sleep data for the formattedDateForMeal, since in that case it doesn't update (the saved data will be of the previous night)
+        // Convert duration from minutes to hours
+        if (sleepProvider.sleepNightData!.duration > 0) { // a duration of 0 is considered as "No sleep recorded" for that night
+          sleepHoursForThisMeal = sleepProvider.sleepNightData!.duration / 60.0; // ! ---> data is not null now
         }
       }
     } catch (e) {
-      // If there's an error fetching sleep data for a specific day (e.g., API error, no data),
-      // print an error and leave sleepHoursForThisMeal as null.
+      // If there's an error fetching sleep data for a specific day print an error and leave sleepHoursForThisMeal as null
       print('Could not fetch sleep data for $formattedDateForMeal: $e');
     }
 
-    // Create the MealData object, optionally attaching sleep hours
+    // Create the MealData object, attaching sleep hours
     mockMeals.add(MealData(
       date: formattedDateForMeal,
       carbs: carbs,
       fats: fats,
       proteins: proteins,
       mealType: mealTypeString,
-      sleepHours: sleepHoursForThisMeal, // Will be null if not found or if fetch failed
+      sleepHours: sleepHoursForThisMeal, // it will be null if not found or if the fetch failed
     ));
   }
   
-  mockMeals.sort((a, b) => b.date.compareTo(a.date));
+  mockMeals.sort((a, b) => b.date.compareTo(a.date)); // sorts data in descending order, from newest to oldest
+                                                      // the list of mock meals is created in ascending order so it needs to be sorted for correct display
   
   return mockMeals;
 }

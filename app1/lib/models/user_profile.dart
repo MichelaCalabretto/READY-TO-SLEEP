@@ -1,7 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserProfile {
-  String? name;
+  String? name; // each variable is nullable since the user can skip the onboarding or not fill out all the forms in the profilePage
   String? surname;
   String? nickname;
   String? gender;
@@ -19,7 +19,7 @@ class UserProfile {
     this.avatar,
   });
 
-  // Load data from SharedPreferences
+  // Loads data from SharedPreferences
   static Future<UserProfile> load() async {
     final sp = await SharedPreferences.getInstance();
     return UserProfile(
@@ -33,14 +33,13 @@ class UserProfile {
     );
   }
 
-  // Save data on SharedPreferences
-  // In lib/models/user_profile.dart
+  // Saves data on SharedPreferences
   Future<void> save() async {
     final sp = await SharedPreferences.getInstance();
-    if (name != null && name!.isNotEmpty) { // Also check for isNotEmpty if empty string means "not set"
+    if (name != null && name!.isNotEmpty) { // also checks for isNotEmpty because empty string means "not set"
       await sp.setString('name', name!);
     } else {
-      await sp.remove('name'); // Remove key if name is null or empty
+      await sp.remove('name'); // removes the key if the name is null or empty (the form can be changed from String to empty and needs to be updated)
     }
     if (surname != null && surname!.isNotEmpty) {
       await sp.setString('surname', surname!);
@@ -52,7 +51,7 @@ class UserProfile {
     } else {
       await sp.remove('nickname');
     }
-    if (gender != null) { // Gender is a fixed list, so null means not selected
+    if (gender != null) { // gender is a fixed list, so null means not selected, it cannot be empty
       await sp.setString('gender', gender!);
     } else {
       await sp.remove('gender');
@@ -62,16 +61,16 @@ class UserProfile {
     } else {
       await sp.remove('dob');
     }
-    if (job != null) { // Job is a fixed list, so null means not selected
+    if (job != null) { // job is a fixed list, so null means not selected, it cannot be empty
       await sp.setString('job', job!);
     } else {
       await sp.remove('job');
     }
-    if (avatar != null) { 
+    if (avatar != null) { // avatar is a fixed list, so null means not selected, it cannot be empty
       await sp.setString('avatar', avatar!);
     } else {
       await sp.remove('avatar'); 
     }
-    await sp.setBool('onboarding_completed', true);
+    await sp.setBool('onboarding_completed', true); // everytime the user updates the profile, or when the user fills out the onBoarding, this flag is set to True, so that the onBoarding is shown only once
   }
 }

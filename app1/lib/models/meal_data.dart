@@ -1,15 +1,10 @@
-class MealData {
-  /// Date of the meal in 'yyyy-MM-dd' format (same format used for sleep data)
-  final String date;
-
-  /// Macronutrient amounts in grams
-  int carbs;
+class MealData { 
+  final String date; // date of the meal in 'yyyy-MM-dd' format
+  int carbs; // macronutrient amounts in grams
   int fats;
   int proteins;
   String mealType;
-
-  /// Number of sleep hours recorded the night after the meal (null if not yet available)
-  double? sleepHours;
+  double? sleepHours; // number of sleep hours recorded the night after the meal (null if not yet available)
 
   MealData({
     required this.date,
@@ -20,34 +15,15 @@ class MealData {
     this.sleepHours, //sleepHours is optional, since it will be aviable only after the night passes
   });
 
-  /// Returns true if sleep data has been recorded after this meal
+  // Returns true if sleep data has been recorded after this meal
   bool isSleepDataAvailable() {
     return sleepHours != null;
   }
 
-  /// Convert object to a Map (for DB storage or serialization)
-  Map<String, dynamic> toMap() => {
-        'date': date,
-        'carbs': carbs,
-        'fats': fats,
-        'proteins': proteins,
-        'mealType': mealType,
-        'sleepHours': sleepHours,
-      };
-
-  /// Create object from Map (from database)
-  factory MealData.fromMap(Map<String, dynamic> map) => MealData( //factory also allows to return null or cache something
-        date: map['date'],
-        carbs: map['carbs'],
-        fats: map['fats'],
-        proteins: map['proteins'],
-        mealType: map['mealType'] ?? 'unknown',
-        sleepHours: map['sleepHours']?.toDouble(),
-      );
-
   @override
   String toString() {
     return 'MealData(date: $date, carbs: $carbs g, fats: $fats g, proteins: $proteins g, '
-        'mealType: $mealType, sleepHours: ${sleepHours?.toStringAsFixed(1) ?? "Not yet recorded"})';
+        'mealType: $mealType, sleepHours: ${sleepHours?.toStringAsFixed(1) ?? "Not yet recorded"})'; // ?. because sleepHours could be null
+                                                                                                     // .toStringAsFixed(1) converts the double into a String with just one decimal number (i.e. 7.5) 
   }
 }

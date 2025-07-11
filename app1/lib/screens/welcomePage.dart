@@ -7,39 +7,44 @@ class WelcomePage extends StatelessWidget {
   Widget build(BuildContext context) {
 
     return Scaffold(
-      extendBodyBehindAppBar: true, //allows content behind status/navigation bar
-      body: SafeArea(
+      extendBodyBehindAppBar: true, // allows content behind status/navigation bar
+      body: SafeArea(  // SafeArea ensures that content avoids system UI ---> full screen design
         top: false,
         bottom: false,
         child: Container(
-          width: double.infinity,
+          width: double.infinity, // the container will fill the entire screen
           height: double.infinity,
-          child: Stack(
+          child: Stack( // Stack allows to place multiple widgets one on top of the other 
             children: [
-              Positioned.fill( //wallpaper
+              // Wallpaper
+              Positioned.fill( // stretches the image to fill the entire space
                 child: Image.asset(
                   'images/welcomePage_wallpaper.png',
-                  fit: BoxFit.cover,
+                  fit: BoxFit.cover, // ensures the image fills the area without distortion
                 ),
               ),
               Center(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0), // padding orizzontale di 20px
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0), 
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center, //centers horizontally
-                    crossAxisAlignment: CrossAxisAlignment.stretch, //centers vertically
+                    mainAxisAlignment: MainAxisAlignment.center, // centers vertically
+                    crossAxisAlignment: CrossAxisAlignment.stretch, // makes the children fill the horizontal space entirely
                     children: [
                       Center(
-                        child: ClipOval( //app's logo
+
+                        // App's logo
+                        child: ClipOval( // for circular image
                           child: Image.asset(
                             'assets/images/logo.png',
                             width: 180,
                             height: 180,
-                            fit: BoxFit.cover,
+                            fit: BoxFit.cover, // ensures the image fills the area without distortion
                           ),
                         ),
                       ),
                       SizedBox(height: 30),
+
+                      // Welcome text
                       Text('Welcome to\nReady to Sleep!', 
                         textAlign: TextAlign.center,
                         style: TextStyle(
@@ -49,6 +54,8 @@ class WelcomePage extends StatelessWidget {
                         )
                       ),
                       SizedBox(height: 30),
+
+                      // Second text
                       Text('Sleep well, live better!', 
                         textAlign: TextAlign.center,
                         style: TextStyle(
@@ -58,6 +65,8 @@ class WelcomePage extends StatelessWidget {
                         )
                       ),
                       SizedBox(height: 40),
+
+                      // Message to the user
                       Text('We hope that this app will help you recognize how essential sleep is, because sleeping well today means living better tomorrow.', 
                         textAlign: TextAlign.center,
                         style: TextStyle(
@@ -74,6 +83,8 @@ class WelcomePage extends StatelessWidget {
                             fontSize: 18,),
                       ),
                       SizedBox(height: 30),
+
+                      // Navigation to the loginPage
                       Center(
                         child: ElevatedButton(
                         onPressed: () {
@@ -81,10 +92,10 @@ class WelcomePage extends StatelessWidget {
                               context, 
                               MaterialPageRoute(builder: (_) => LoginPage())); 
                           },
-                          style: ElevatedButton.styleFrom( 
+                          style: ElevatedButton.styleFrom( // .styleFrom to customize the button appearance
                             backgroundColor: Colors.white, 
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),), 
-                            padding: EdgeInsets.symmetric(horizontal: 60, vertical: 20),
+                            padding: EdgeInsets.symmetric(horizontal: 60, vertical: 20), // internal padding
                           ),
                           child: Text(
                             'To LoginPage',
