@@ -163,15 +163,21 @@ class UserGreetingWithAvatar extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Center the greeting text horizontally
-                Center(
-                  child: Text(
-                    greetingMessage,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: textColor,
-                      fontSize: 14.5,
-                      fontWeight: FontWeight.w500,
-                      height: 1.4,
+                // Wrap Text with Flexible to prevent overflow inside Row
+                Flexible( // allows greeting text to wrap and shrink within available space
+                  child: Center(
+                    child: SingleChildScrollView( // SingleChildScrollView to make the greeting text scrollable vertically
+                      scrollDirection: Axis.vertical, // set scroll direction to vertical
+                      child: Text(
+                        greetingMessage,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: textColor,
+                          fontSize: 14.5,
+                          fontWeight: FontWeight.w500,
+                          height: 1.4,
+                        ),
+                      ),
                     ),
                   ),
                 ),
