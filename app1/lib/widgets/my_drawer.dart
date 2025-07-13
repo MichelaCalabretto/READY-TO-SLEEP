@@ -27,7 +27,7 @@ class MyDrawer extends StatelessWidget {
     String avatarName = profile?.avatar?.isNotEmpty == true ? profile!.avatar! : 'cat'; // if the user chose an avatar, then that is what will be shown, otherwise the default avatar is the cat (uses a ternary operator ---> condition ? expression1 : expression2)
                                                                                         // ?. is the null aware access
                                                                                         // ! to assure Dart that in this moment it is not null
-   return 'images/avatars/$avatarName.png';
+   return 'assets/images/avatars/$avatarName.png';
   }
 
 

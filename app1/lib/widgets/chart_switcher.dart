@@ -164,48 +164,40 @@ class _ChartSwitcherState extends State<ChartSwitcher> {
           padding: const EdgeInsets.all(16), // padding all around
           // Transparent background 
           color: Colors.transparent,
-          // LayoutBuilder to dynamically adapt height based on screen constraints
-          child: LayoutBuilder( // LayoutBuilder  lets you access the size constraints (i.e. max height/width) of the parent widget at build time
-            builder: (context, constraints) {
-              double chartHeight = constraints.maxHeight * 0.7; // allocates 70% of available height to the chart area
-                                                                // constraints.maxHeight is the maximum height the widget can use ---> the chart_switcher is set to take 70% of the maxHeight
-              return Column(
-                mainAxisSize: MainAxisSize.min, // so that the column will take only the minimum space needed, based on its children
-                children: [
-                  _buildDatePickerButton(),
-                  const SizedBox(height: 12),
+          child: Column(
+            //mainAxisSize: MainAxisSize.min, // so that the column will take only the minimum space needed, based on its children
+            children: [
+              _buildDatePickerButton(),
+              const SizedBox(height: 12),
 
-                  // Swipeable charts area
-                  SizedBox(
-                    height: chartHeight,
-                    child: PageView( // widget to swipe horizontally between the two charts
-                      controller: _pageController, // page visible at the moment
-                      onPageChanged: (page) { // everytime the page changes, the _currentPage will be changed conseguentely
-                        setState(() {
-                          _currentPage = page;
-                        });
-                      },
-                      children: [
-                        // Graph1 expects SleepDataNight for a single night
-                        Graph1(
-                          sleepData: nightData,
-                        ),
-                        // Graph2 expects List<SleepDataTrend> for the week
-                        Graph2(
-                          trendData: trendData,
-                          endDate: _selectedDate,
-                        ),
-                      ],
+              // Swipeable charts area
+              Expanded(
+                child: PageView( // widget to swipe horizontally between the two charts
+                  controller: _pageController, // page visible at the moment
+                  onPageChanged: (page) { // everytime the page changes, the _currentPage will be changed conseguentely
+                    setState(() {
+                      _currentPage = page;
+                    });
+                  },
+                  children: [
+                    // Graph1 expects SleepDataNight for a single night
+                    Graph1(
+                      sleepData: nightData,
                     ),
-                  ),
+                    // Graph2 expects List<SleepDataTrend> for the week
+                    Graph2(
+                      trendData: trendData,
+                      endDate: _selectedDate,
+                    ),
+                  ],
+                ),
+              ),
 
-                  const SizedBox(height: 12),
+              const SizedBox(height: 12),
 
-                  // Page indicator dots
-                  _buildPageIndicator(),
-                ],
-              );
-            }
+              // Page indicator dots
+              _buildPageIndicator(),
+            ],
           ),
         );
       },

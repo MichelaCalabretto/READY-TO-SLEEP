@@ -19,7 +19,7 @@ class WelcomePage extends StatelessWidget {
               // Wallpaper
               Positioned.fill( // stretches the image to fill the entire space
                 child: Image.asset(
-                  'images/welcomePage_wallpaper.png',
+                  'assets/images/welcomePage_wallpaper.png',
                   fit: BoxFit.cover, // ensures the image fills the area without distortion
                 ),
               ),

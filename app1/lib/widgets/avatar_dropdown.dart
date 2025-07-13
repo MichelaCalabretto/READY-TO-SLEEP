@@ -45,7 +45,7 @@ class AvatarDropdown extends StatelessWidget {
           child: Row(
             children: [
               Image.asset(
-                'images/avatars/$filename.png',
+                'assets/images/avatars/$filename.png',
                 width: 40,
                 height: 40,
               ),

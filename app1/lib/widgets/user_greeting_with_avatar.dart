@@ -52,11 +52,11 @@ class UserGreetingWithAvatar extends StatelessWidget {
     // Determine avatar mood based on sleep hours
     bool isHappy = previousNightSleep != null && sleepHoursActual >= 7;
     String avatarMoodPrefix = isHappy ? 'happy' : 'sad';
-    String neutralAvatarPath = 'images/avatars/${avatarBaseName}.png'; 
+    String neutralAvatarPath = 'assets/images/avatars/${avatarBaseName}.png'; 
     String ultimateFallbackAvatarPath = 'images/avatars/sad_cat.gif'; 
 
     // Construct paths for avatar images
-    String primaryAvatarPath = 'images/avatars/${avatarMoodPrefix}_${avatarBaseName}.gif'; 
+    String primaryAvatarPath = 'assets/images/avatars/${avatarMoodPrefix}_${avatarBaseName}.gif'; 
 
     String greetingMessage; 
     String formattedDuration = _formatSleepDurationHelper(sleepMinutes); 
@@ -64,7 +64,7 @@ class UserGreetingWithAvatar extends StatelessWidget {
     if (previousNightSleep == null) {
       greetingMessage = "Couldn't retrieve last night's sleep data. How about planning a healthy dinner for tonight?";
       avatarMoodPrefix = 'sad'; 
-      primaryAvatarPath = 'images/avatars/${avatarMoodPrefix}_${avatarBaseName}.gif'; 
+      primaryAvatarPath = 'assets/images/avatars/${avatarMoodPrefix}_${avatarBaseName}.gif'; 
     } else if (sleepMinutes <= 0) {
       greetingMessage = "It seems no sleep was recorded for last night. A nutritious dinner today might set you up for better rest!";
     } else if (sleepHoursActual < 5) {
@@ -163,21 +163,15 @@ class UserGreetingWithAvatar extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Center the greeting text horizontally
-                // Wrap Text with Flexible to prevent overflow inside Row
-                Flexible( // allows greeting text to wrap and shrink within available space
-                  child: Center(
-                    child: SingleChildScrollView( // SingleChildScrollView to make the greeting text scrollable vertically
-                      scrollDirection: Axis.vertical, // set scroll direction to vertical
-                      child: Text(
-                        greetingMessage,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: textColor,
-                          fontSize: 14.5,
-                          fontWeight: FontWeight.w500,
-                          height: 1.4,
-                        ),
-                      ),
+                Center(
+                  child: Text(
+                    greetingMessage,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 14.5,
+                      fontWeight: FontWeight.w500,
+                      height: 1.4,
                     ),
                   ),
                 ),

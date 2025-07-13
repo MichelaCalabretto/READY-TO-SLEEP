@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:app1/models/meal_data.dart';
-import 'package:app1/providers/meal_data_provider.dart';
-import 'package:app1/providers/data_provider.dart'; 
+import 'package:app1/providers/meal_data_provider.dart'; 
 import 'package:app1/widgets/diary_list_item.dart'; 
 import 'package:app1/utils/mock_meals.dart'; 
 
@@ -94,14 +93,12 @@ class DiaryPage extends StatelessWidget {
                           ),
                         ) ?? false; // if dialog is dismissed (the user taps outside of the dialog window and therefore closes the dialog without selecting either Cancel or Confirm), consider it false
                     if (confirm) {
-                      // Get the SleepDataProvider
-                      final sleepProvider = Provider.of<SleepDataProvider>(context, listen: false); // get the instance of the provider without listening for changes ("read only" mode)
                       // Show a snackBar to notify the user
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Populating diary...', style: TextStyle(color: whiteStrong)), backgroundColor: lilla),
                       );
                       try {
-                        final mockMeals = await generateMockMeals(sleepProvider); // generate the mock meals using the function defined in mock_meals
+                        final mockMeals = await generateMockMeals(); // generate the mock meals using the function defined in mock_meals
                         mealDataProvider.loadMockMealHistory(mockMeals);  // load the generated mock meals in the provider
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('Diary populated successfully!', style: TextStyle(color: whiteStrong)), backgroundColor: snackbarColor),

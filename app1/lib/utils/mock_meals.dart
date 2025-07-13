@@ -1,11 +1,13 @@
 import 'package:app1/models/meal_data.dart';
-import 'package:app1/providers/data_provider.dart';
+import 'package:app1/utils/impact.dart';
+import 'package:app1/models/sleep_data_night.dart'; 
+//import 'package:app1/providers/data_provider.dart';
 import 'package:intl/intl.dart';
 import 'dart:math'; // for the random generator
 
 // Generates a List of MealData objects that will be the 30 mock MealData entries for the past 30 days
 // If available, sleep duration from individual night data is matched and attached
-Future<List<MealData>> generateMockMeals(SleepDataProvider sleepProvider) async { // the SleepDataProvider is a required input to be able to fetch the sleepData of the night and link it to the meal
+Future<List<MealData>> generateMockMeals() async {
   final List<MealData> mockMeals = [];
   final now = DateTime.now(); 
   
@@ -66,14 +68,20 @@ Future<List<MealData>> generateMockMeals(SleepDataProvider sleepProvider) async 
     double? sleepHoursForThisMeal; // ? because there could be no sleep data for that night (it is initialized as null and will be assigned a value after fetching the data, if there's data)
 
     try {
-      // Fetch sleep data for the specific night corresponding to the meal date
-      await sleepProvider.fetchSleepNightData(formattedDateForMeal);
-      // Check if the fetched data corresponds to the requested date and has a valid duration
-      // sleepProvider.sleepNightData will be null if the fetch failed or no data was returned
-      if (sleepProvider.sleepNightData != null && sleepProvider.sleepNightData!.time == formattedDateForMeal) { // the check on the time is essential for when there is no sleep data for the formattedDateForMeal, since in that case it doesn't update (the saved data will be of the previous night)
-        // Convert duration from minutes to hours
-        if (sleepProvider.sleepNightData!.duration > 0) { // a duration of 0 is considered as "No sleep recorded" for that night
-          sleepHoursForThisMeal = sleepProvider.sleepNightData!.duration / 60.0; // ! ---> data is not null now
+      // Directly call the API using the Impact utility to fetch raw sleep data
+      final rawData = await Impact.fetchSleepNightData(formattedDateForMeal);
+
+      if (rawData != null &&
+          rawData['data'] is Map &&
+          rawData['data']['data'] != null) {
+        
+        // Extracting the specific sleep data payload from the response    
+        final sleepJson = rawData['data']['data'];
+        // Parsing the raw JSON into a structured SleepDataNight object 
+        final parsedData = SleepDataNight.fromApiData(formattedDateForMeal, sleepJson);
+
+        if (parsedData != null && parsedData.duration > 0) {
+          sleepHoursForThisMeal = parsedData.duration / 60.0;
         }
       }
     } catch (e) {

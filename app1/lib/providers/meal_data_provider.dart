@@ -24,8 +24,8 @@ class MealDataProvider extends ChangeNotifier {
     final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
     final existingIndex = _meals.indexWhere((meal) => meal.date == today); // .indexWhere is a List's method that allows to search inside a List where a certain condition is verified
-                                                                          // in this case the condition to be verified is if a meal for the specific date already exists
-                                                                          // if not, it returns -1, if it exists, it returns the index of the meal in the list
+                                                                           // in this case the condition to be verified is if a meal for the specific date already exists
+                                                                           // if not, it returns -1, if it exists, it returns the index of the meal in the list
 
     if (existingIndex != -1) {
       // If meal for today already exists, update it

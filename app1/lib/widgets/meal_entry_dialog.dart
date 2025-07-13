@@ -58,6 +58,7 @@ class _MealEntryDialogState extends State<MealEntryDialog> {
 
     // ANALYSIS
     String feedbackMessage;
+    
     final similarMealsWithSleep = allMeals.where((meal) { // cehck in the List allMeals all the meals that satisfy the condition, and adds them to the similarMealsWithSleep List
       // Find similar meals from the history that have sleep data
       return meal.isSleepDataAvailable() && _isMealSimilar(meal, carbs, fats, proteins); // .isSleepDataAviable() is defined in meal_data and checks if the meal has associated sleepData
@@ -65,7 +66,7 @@ class _MealEntryDialogState extends State<MealEntryDialog> {
     }).toList();
 
     if (similarMealsWithSleep.isEmpty) {
-      feedbackMessage = "Your meal has been recorded. Let's see how you sleep tonight!";
+      feedbackMessage = "This seems to be a new type of meal for you. Let's see how you sleep tonight!";
     } else {
       // Calculate the average sleep for those similar meals
       double totalHours = 0;
